@@ -1,0 +1,39 @@
+Premier probleme rencontré : 
+Requête pour récupérer les notes n'aboutit pas
+
+Tests :
+Affichage de la console dans la page HTML 
+-> Console : aucun log
+-> Sources : il y a un debugger pour chaque fichier, on peut mettre des points d'arrêt
+-> utilisation de console.log() pour voir ce qu'il se passe
+-> Pour relancer le debugger (bizarre) : fermer l'onglet, réouvrir & raffraichir
+
+-> J'ai ouvert la page api.php et j'ai regardé : 
+-> Problème sur le nom de la base de données (oublié de mettre à jour)
+-> Deuxième probleme : commentaire en utilisant "<!--" en dehors du PHP, quand le JS appelle le php, il lit TOUT le fichier.
+Il ne reconnait pas les commentaires HTML.
+
+Solution :
+Mise à jour du nom de la base de données
+J'ai enlevé le commentaire HTML dans le fichier PHP appelé par le JS
+
+
+RAFRAICHIR SANS LE CACHE : Ctrl + F5 (mon dieu le gain de temps)
+
+
+Pour les classes, on peut utiliser les classes bootstrap déjà faites :
+- "text-success" : passe le texte de la balise en vert
+- "text-warning" : passe le texte de la balise en jaune
+- "text-danger" : passe le texte de la balise en rouge
+
+
+Problème :
+Lorsque j'envoie le formulaire, une erreur apparaît querySelector cannot read properties of null.
+J'ai observé & creerCarte() retourne null.
+api.php renvoie -> title + description + id_task + priority
+Hors creerCarte() a besoin de title + description + id_task + priority + state + created_at
+
+Solution :
+Récupéré l'id de la tâche qui vient d'être créée avec lastInsertId()
+Faire un SELECT * de toutes les informations pour les renvoyer à creerCarte
+

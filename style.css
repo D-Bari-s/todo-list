@@ -1,0 +1,169 @@
+
+h1 {
+    text-align: center;
+}
+h2{
+    font-family:'Segoe UI', 'light', sans-serif;
+}
+
+#message{
+    align-self: center;
+    margin: 20px auto;
+    text-align: center;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    animation: glisser 0.5s ease-in-out;
+    font-size: 20px;
+}
+
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius:10px;
+}
+
+@keyframes glisser {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card{
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    /* Ajoute une animation */
+    animation: glisser 0.5s ease-out;
+    border-radius: 15px;
+}
+
+
+
+#connect-form, #inscription-form{
+    margin: 0 auto;
+    text-align:center;
+    max-width: 400px;
+    /* ALigner le formulaire au centre de la page */
+
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input,
+textarea {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Pour les boutons d'envoi & de connexion dans l'UI */
+.form-btn {
+    background-color:rgb(80, 8, 248);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.5s ease;
+}
+
+.form-btn:hover {
+    background-color: rgb(61, 7, 189);
+    transition: 0.5s ease;
+}
+
+
+/* Pour les logos liées aux actions CRUD */
+.logo-crud{
+    border: none;
+    cursor: pointer;
+    font-size: 25px;
+    padding: 0px;
+    background-color: rgba(0, 0, 0, 0.0);
+    border-radius: 20px;
+    transition: 0.3s ease;
+    text-decoration: none;
+}
+
+.logo-crud:hover{
+    transition: 0.3s ease;
+    text-decoration: none;
+    font-size:26px;
+}
+
+
+/* Style pour la classe champ */
+.champ {
+    margin-bottom: 20px;
+}
+
+/* Style pour le message de confirmation */
+.confirmation {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.confirmation p {
+    font-weight: bold;
+}
+
+#liste-notes
+{
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+#basse,#moyenne,#haute
+{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #cccccc61;
+    border-radius: 10px;
+    align-items: center;
+    min-height:200px;
+    margin-top: 10px;
+}
+
+.message{
+    margin: auto;
+    animation: glisser 0.5s ease-out;
+}
+/* Style pour la balise de classe list-box (select & options), style similaire à champ */
+.list-box{
+    margin-bottom: 20px;
+}
+
+#priority {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 20px;
+    width: 90%;
+    
+}
+.basse,.moyenne,.haute{
+    /* Background gris clair, bords arrondis et shadowbox */
+    background-color: #f2f2f2;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s ease;
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des notes</title>
+    <!-- Bootstrap : -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Fichier style : -->
+    <link rel="stylesheet" href="style.css">
+</head>
+  <body>
+    <!-- Navbar bootstrap : -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">ToDo - List</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link active" aria-current="page" href="index.html">Notes</a>
+            <a class="nav-link" aria-current="page" href="connexion.php">Connexion</a>
+            <a class="nav-link" href="#">Déconnexion - A changer pour gérer via PHP</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <h1>📝 Liste des notes</h1>
+
+    <!-- Formulaire pour ajouter une note : -->
+    <form id="form-note" action="api.php" method="POST">
+
+      <!-- input hidden : l'utilisateur ne le voit pas,
+            mais il indique à PHP quelle action effectuer -->
+      <input type="hidden" name="action" value="create-note">
+      <!-- Titre de la note : -->
+      <div class="champ">
+        <label for="titre">Titre</label>
+        <input type="text" id="title" name="title" placeholder="Ex : Ma première note" required>
+      </div>
+      <!-- Contenu de la note : -->
+      <div class="champ">
+        <label for="description">Contenu</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+          placeholder="Écris ta note ici..."
+          required
+        ></textarea>
+      </div>
+      <div class="date">
+        <label for="target_date">Date de rendue</label>
+        <input
+          type="date"
+          id="target_date"
+          name="target_date"
+          value="2026-04-19"
+          min="2026-04-19"
+          max="2030-04-19" />
+      </div>
+      <div class="list-box">
+        <label for="priority">Priorité</label>
+        <select id="priority" name="priority">
+          <option value="basse" class="text-success">Basse</option>
+          <option value="moyenne" class="text-warning">Moyenne</option>
+          <option value="haute" class="text-danger">Haute</option>
+        </select>
+      </div>
+      <button type="submit" id="form-btn" class="form-btn">Ajouter la note</button>
+
+    </form>
+    <!-- Message feedback : -->
+    <div id="message" class="message" style="display:none;"></div>
+
+    <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
+    <div id="liste-notes">
+      <!-- Les notes seront injectées ici par PHP ou par JavaScript -->
+      <p class="chargement">Chargement des notes...</p>
+
+    </div>
+
+    <!-- Appel du script JavaScript une fois la page chargée : -->
+    <script src="app.js"></script>
+  </body>
+</html>
