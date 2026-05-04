@@ -11,8 +11,9 @@ header('Access-Control-Allow-Origin: *;');
 //Pour toutes les requêtes POST :
 if ($_SERVER['REQUEST_METHOD'] === 'POST')
 {
+    $action = $_POST['action'];
     //Si le PHP est appelé depuis la création d'un nouvel user :
-    if ($_POST['action'] === 'create-user')
+    if ($action === 'create-user')
     {
         // On récupère les données envoyées en POST via le formulaire :
         $username = $_POST['username'] ?? '';
@@ -20,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         $pwd = $_POST['pwd'] ?? '';
         if (empty($username) || empty($email) || empty($pwd))
         {
-            echo json_encode(['status'=>'OK','message' => 'merci de remplir les champs nécessaires']);
+            echo json_encode(['status'=>'error','message' => 'merci de remplir les champs nécessaires']);
             exit;
         }
         //On vérifie que l'email & l'username soient unique :
@@ -51,13 +52,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     }
     
     //Si le PHP est appelé depuis la connexion :
-    if ($_POST['action'] === 'connect')
+    if ($action === 'connect')
     {
 
     }
 
+    //Si le PHP est appelé depuis le popup de modification :
+    if ($action === 'modify-note')
+    {   
+        try
+        {
+            //Construction d'une requête dynamique :
+            $fields = [];
+            $params = [];
+            
+            //On regarde si le paramètre est rempli, si oui on l'ajoute au tableau :
+            if (isset($_POST['title']))
+            {
+                $fields['title'] = 'title = :title';
+                $params['title'] =trim($_POST['title']); 
+            }
+            if (isset($_POST['description']))
+            {
+                $fields['description'] = 'description = :description';
+                $params['description'] = trim($_POST['description']); 
+            }
+            if (isset($_POST['priority']))
+            {
+                $fields['priority'] = 'priority = :priority';
+                $params['priority'] = trim($_POST['priority']); 
+            }
+            if (isset($_POST['target_date']))
+            {
+                $fields['target_date'] = 'target_date = :target_date';
+                $params['target_date'] = trim($_POST['target_date']); 
+            }
+            if(isset($_POST['id']))
+            {
+                $params['id'] = trim($_POST['id']);
+            }
+            else
+            {
+                echo json_encode(['status'=>'error','response'=>'id vide']);
+                exit;
+            }
+
+            //Si aucun paramètre n'est rempli par l'utilisateur :
+            if (empty($fields) || empty($params))
+            {
+                echo json_encode(['status' => 'error', 'response' => 'Merci de remplir au moins un champ']);
+                exit;
+            }
+
+            //On concatène les paramètres à modifier en un seul string, séparés par une virgule :
+            $imploded_fields = implode(",",$fields);
+
+            //On prépare & on exécute la requête : 
+            $string_update = "UPDATE Tasks SET $imploded_fields WHERE id_task = :id";
+            $sth = $connection->prepare($string_update);
+            //PDO va lire un à un les paramètres nommés & associer les valeurs dans la requête :
+            $sth->execute($params);
+            $response = $sth->fetchAll();
+            echo json_encode(['status'=>'success','response'=>$response]);
+            exit;
+        }
+        catch (PDOException $e)
+        {
+            echo json_encode(['status'=>'error', 'response' => $e->getMessage()]);
+            exit;
+        }      
+
+    }
     //Si le PHP est appelé depuis la création d'une note :
-    if ($_POST['action'] === 'create-note')
+    if ($action === 'create-note')
     {
         try
         {
@@ -125,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             echo json_encode(['status'=>'error','response'=>$e->getMessage()]);
         }
     }
-    if($_POST['action'] === 'delete-note')
+    if($action === 'delete-note')
     {
         try
         {

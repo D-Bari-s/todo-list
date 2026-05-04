@@ -5,6 +5,7 @@ const formulaire = document.getElementById('form-note');
 const message = document.getElementById('message');
 const liste_notes = document.getElementById('liste-notes');
 const popup = document.getElementById('popup');
+
 //Catégories en scope global :
 const notes_basses = null;
 const notes_moyennes = null;
@@ -193,6 +194,58 @@ function construirePopup()
     button_close.addEventListener('click', () => fermerPopup());
     button_close.classList.add('form-btn');
     popup.appendChild(button_close);
+
+    //Ajouter un eventListener au formulaire de modification :
+    cloned_formulaire.addEventListener('submit', async function(evenement)
+    {
+        try
+        {
+            //Empêcher le rafraîchissement de la page :
+            evenement.preventDefault();
+
+            //Empêcher les doubles appels :
+            const button = cloned_formulaire.querySelector('#form-btn');
+            button.disabled = true;
+            button.textContent = 'Modification en cours...';
+
+            //Récupérer les données du formulaire avec FormData :
+            const donnees = new FormData(cloned_formulaire);
+            console.log(donnees['target_date']);
+            //On récupère l'id de la carte pour savoir laquelle modifier :
+            const card = popup.querySelector('.card');
+            const id_card = card.dataset.id;
+            
+            //On l'ajoute au body :
+            donnees.append('id',`${id_card}`);
+            const response = await fetch('api.php',
+                {
+                    method: 'POST',
+                    body: donnees
+                }
+            );
+
+            const resultat = response.json();
+            if (response.status === 'error')
+            {
+                afficherMessage(response.response, 'text-danger');
+            }
+
+            button.disabled = false;
+            button.textContent ='Modifier la note';
+            fermerPopup();
+            afficherNotes();
+            console.log(response.response);
+            afficherMessage('Note modifiée avec succès ! ✅');
+        }
+        catch (e)
+        {
+            afficherMessage(e, 'text-danger');
+        }
+        
+
+
+        
+    });
 }
 
 //Fonction pour ouvrir un popup en fonction de la tâche
@@ -204,10 +257,17 @@ function ouvrirPopup(note_id)
     const note_to_modify = liste_notes.querySelector(`.card[data-id="${note_id}"]`);
     //On la clone :
     const cloned_note = note_to_modify.cloneNode(true);
-    //Puis on récupère la div pour lui ajouter :
+
+    //Enlever les 2 logos CRUD :
+    cloned_note.querySelector('.logo-crud').remove();
+    cloned_note.querySelector('.logo-crud').remove();
+
+    //Puis on récupère la div 'popup-actuel' pour lui ajouter :
     const popup_actuel = popup.querySelector('#popup-actuel');
     popup_actuel.appendChild(cloned_note);
 
+    //Modification des champs par defaut, pour que ça match avec ceux de la note :
+    const champ_date = popup.querySelector('#target_date');
 
 }
 
@@ -352,6 +412,8 @@ formulaire.addEventListener('submit', async function(evenement)
     }
     
 });
+
+
 
 //Formater la date & heure : 
 function formatDateTime (dateStr)
