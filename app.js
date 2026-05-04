@@ -4,39 +4,13 @@
 const formulaire = document.getElementById('form-note');
 const message = document.getElementById('message');
 const liste_notes = document.getElementById('liste-notes');
-
-
+const popup = document.getElementById('popup');
 //Catégories en scope global :
 const notes_basses = null;
 const notes_moyennes = null;
 const notes_hautes = null;
 
 // ---------------------- Définition des fonctions : -------------------------------------------------
-
-
-//Formater la date & heure : 
-function formatDateTime (dateStr)
-{
-    const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
-    return date.toLocaleDateString('fr-FR', {
-        day:    'numeric',
-        month:  'long',
-        year:   'numeric',
-        hour:   '2-digit',
-        minute: '2-digit'
-    });
-}
-
-//Formater la date :
-function formatDate(dateStr)
-{
-    const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
-    return date.toLocaleDateString('fr-FR', {
-        day:    'numeric',
-        month:  'long',
-        year:   'numeric',
-    });
-}
 
 
 // Afficher les notes
@@ -157,10 +131,12 @@ function creerCarte(note)
         //en lui passant l'id de la note & la carte :
         delete_note.addEventListener('click', ()=>supprimerNote(note.id_task, note_card));
 
-        const modify_note = document.createElement('a');
+        //EventListener : ouvrir un popoup pour modifier la note
+        const modify_note = document.createElement('button');
         modify_note.className = 'logo-crud';
         modify_note.textContent = '📝';
-        modify_note.href = `fiche-note.php?id=${note.id_task}`;
+        modify_note.addEventListener('click', ()=>ouvrirPopup(note.id_task));
+
 
         //Ajouter les éléments au body de la card :
         //Plus simple à maintenir, suffit d'ajouter un élément au tableau :
@@ -190,6 +166,57 @@ function creerCarte(note)
         return null;
     }
     
+}
+
+//Construction du popup :
+function construirePopup()
+{
+    //Cloner le formulaire pour éviter le code HTML duppliqué :
+    const cloned_formulaire = formulaire.cloneNode([deep=true]);
+    cloned_formulaire.id ='modif-form';
+
+    //On l'ajoute au popup :
+    const div_test = document.getElementById('popup-modif');
+    div_test.appendChild(cloned_formulaire);
+
+    //On modifie le contenu du bouton :
+    const button_modif = cloned_formulaire.querySelector('#form-btn');
+    button_modif.textContent = 'Modifier la note';
+
+
+    //On modifie l'action du formulaire en ciblant l'hidden input :
+    cloned_formulaire.querySelector('#action-form').value = 'modify-note';
+
+    //Ajouter le bouton pour fermer le popup :
+    const button_close = document.createElement('button');
+    button_close.textContent = 'Fermer le popup';
+    button_close.addEventListener('click', () => fermerPopup());
+    button_close.classList.add('form-btn');
+    popup.appendChild(button_close);
+}
+
+//Fonction pour ouvrir un popup en fonction de la tâche
+function ouvrirPopup(note_id)
+{
+    //On ajoute la classe open au popup :
+    popup.classList.add('open');
+    //On récupère l'élément possédant la classe card et dont l'id correspond à l'id de la note à modifier
+    const note_to_modify = liste_notes.querySelector(`.card[data-id="${note_id}"]`);
+    //On la clone :
+    const cloned_note = note_to_modify.cloneNode(true);
+    //Puis on récupère la div pour lui ajouter :
+    const popup_actuel = popup.querySelector('#popup-actuel');
+    popup_actuel.appendChild(cloned_note);
+
+
+}
+
+function fermerPopup()
+{
+    //On enlève la classe open :
+    popup.classList.remove('open');
+    //On retire la note du popup en la retirant du popup :
+    popup.querySelector('.card').remove();
 }
 
 //Affichage du message dans la div message, avec le contenu & le type envoyé, par défaut success :
@@ -326,5 +353,30 @@ formulaire.addEventListener('submit', async function(evenement)
     
 });
 
+//Formater la date & heure : 
+function formatDateTime (dateStr)
+{
+    const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
+    return date.toLocaleDateString('fr-FR', {
+        day:    'numeric',
+        month:  'long',
+        year:   'numeric',
+        hour:   '2-digit',
+        minute: '2-digit'
+    });
+}
+
+//Formater la date :
+function formatDate(dateStr)
+{
+    const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
+    return date.toLocaleDateString('fr-FR', {
+        day:    'numeric',
+        month:  'long',
+        year:   'numeric',
+    });
+}
+
 // ---------------------- Code principal : -----------------------------------------------------------
 afficherNotes();
+construirePopup();
