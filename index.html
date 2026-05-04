@@ -34,7 +34,7 @@
 
       <!-- input hidden : l'utilisateur ne le voit pas,
             mais il indique à PHP quelle action effectuer -->
-      <input type="hidden" name="action" value="create-note">
+      <input type="hidden" name="action" id="action-form" value="create-note">
       <!-- Titre de la note : -->
       <div class="champ">
         <label for="titre">Titre</label>
@@ -74,7 +74,20 @@
     </form>
     <!-- Message feedback : -->
     <div id="message" class="message" style="display:none;"></div>
+    <div id="popup">
+      <h3>Modifier la note</h3>
+      <div id="popup-body">
+        <div id="popup-actuel">
+        <!-- La note choisie sera injectée ici -->
 
+        </div>
+        <div id="popup-modif">
+          <!-- Les champs de modification apparaîtront ici, on copie le formulaire en changeant l'action du bouton -->
+
+        </div>
+      </div>
+      
+    </div>
     <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
     <div id="liste-notes">
       <!-- Les notes seront injectées ici par PHP ou par JavaScript -->
