@@ -120,10 +120,12 @@ function creerCarte(note)
         const is_late = new Date(note.target_date) < Date.now();
         //Si la note est en retard, en évidence :
         note_target_date.className = is_late ? 'text-danger' : 'text-success';
+        note_target_date.classList.add('target-date');
         note_card.style.backgroundColor = is_late ? 'rgba(248, 8, 8, 0.2)' : 'white';
         // Texte :
         note_target_date.textContent = `📅 Date de rendue : ${formatDate(note.target_date)}`;
-
+        //Ajout de la date de rendue au dataset pour l'ajouter dans le popup:
+        note_card.dataset.target_date = note.target_date;
         //Actions sur la note :
         const delete_note = document.createElement('button');
         delete_note.className = 'logo-crud';
@@ -138,6 +140,11 @@ function creerCarte(note)
         modify_note.textContent = '📝';
         modify_note.addEventListener('click', ()=>ouvrirPopup(note.id_task));
 
+        //Bouton pour marquer la tâche commme terminée :
+        //Ce bouton doit désactiver les modifs de la tâche et la rendre verte
+        const fulfill_note = document.createElement('button');
+        fulfill_note.className = 'logo-crud';
+        
 
         //Ajouter les éléments au body de la card :
         //Plus simple à maintenir, suffit d'ajouter un élément au tableau :
@@ -184,6 +191,10 @@ function construirePopup()
     const button_modif = cloned_formulaire.querySelector('#form-btn');
     button_modif.textContent = 'Modifier la note';
 
+    //On autorise les champs vides pour que l'utilisateur choisisse quoi modifier :
+    //"required" ne prend pas de valeur, on le retire donc
+    cloned_formulaire.querySelector('#description').removeAttribute("required");
+    cloned_formulaire.querySelector('#title').removeAttribute("required");
 
     //On modifie l'action du formulaire en ciblant l'hidden input :
     cloned_formulaire.querySelector('#action-form').value = 'modify-note';
@@ -257,7 +268,7 @@ function ouvrirPopup(note_id)
     const note_to_modify = liste_notes.querySelector(`.card[data-id="${note_id}"]`);
     //On la clone :
     const cloned_note = note_to_modify.cloneNode(true);
-
+    cloned_note.id = 'cloned-note';
     //Enlever les 2 logos CRUD :
     cloned_note.querySelector('.logo-crud').remove();
     cloned_note.querySelector('.logo-crud').remove();
@@ -268,7 +279,17 @@ function ouvrirPopup(note_id)
 
     //Modification des champs par defaut, pour que ça match avec ceux de la note :
     const champ_date = popup.querySelector('#target_date');
+    const champ_priority = popup.querySelector('#priority');
 
+    //On récupère la data dans le dataset de la carte & on l'assigne :
+    const default_date = cloned_note.dataset.target_date;
+    champ_date.value = default_date;
+    
+    //On récupère la priorité actuelle en la reformattant :
+    let selected_priority = cloned_note.querySelector('#note-priority').textContent.replace('Priorité : ','');
+
+    //Et pour l'option dont la value correspond, on lui ajoute l'attribut 'selected' :
+    champ_priority.querySelector(`option[value=${selected_priority}]`).setAttribute('selected','');
 }
 
 function fermerPopup()
@@ -439,6 +460,28 @@ function formatDate(dateStr)
     });
 }
 
+//Enlever le format appliqué :
+function unformatDate(dateStr)
+{
+    //Enlever '📅 Date de rendue : '
+    const date = new Date(dateStr.replace('📅 Date de rendue : ',''));
+    return date.toLocaleDateString('fr-FR',{ dateStyle: 'short' });
+}
+
 // ---------------------- Code principal : -----------------------------------------------------------
-afficherNotes();
-construirePopup();
+
+// On récupère le titre de la page pour décider de quelle fonction s'exécute :
+const titre_page = document.title;
+
+//Si le JS est appelé depuis index.html :
+if (titre_page == 'Liste des notes')
+{
+    afficherNotes();
+    construirePopup();
+}
+
+//Si le JS est appelé depuis connexion.php :
+if (titre_page == 'Connexion')
+{
+
+}
