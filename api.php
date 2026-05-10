@@ -28,24 +28,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         $verif_string = "SELECT * FROM users WHERE email=:email OR username=:username";
 
         $sth = $connection->prepare($verif_string);
-        $sth->execute([$email,$username]);
+        $sth->execute([
+            ':email' => $email,
+            ':username' => $username]);
         $verif = $sth->fetchAll();
         
         //Si un email ou username est déjà existant :
         if (count($verif) > 0)
         {
-            //On retourne un code d'erreur si un utilisateur avec le même email ou username est trouvé
+            //On retourne le même message si un user est trouvé
+            //Permet de ne pas donner de piste à un HACKER MALVEILLANT
             echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou username n\'est trouvée, le compte sera créé.']);
             exit;
         }
 
         //Sinon on ajoute l'utilisateur à la base :
         //Requête préparée avec paramètres nommés :
-        $string = "INSERT INTO users VALUES(:email,:username,:pwd);";
+        $string = "INSERT INTO users(email,username,password) VALUES(:email,:username,:pwd);";
         $sth = $connection->prepare($string);
         $pwd = password_hash($pwd,PASSWORD_BCRYPT);
-        $sth->execute([$email,$username,$pwd]);
+        $sth->execute([
+            ':email' => $email,
+            ':username' => $username,
+            ':pwd' => $pwd]);
 
+        header('Location: connexion.php');
         echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou username n\'est trouvée, le compte sera créé.']);
         exit;
 
@@ -54,6 +61,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     //Si le PHP est appelé depuis la connexion :
     if ($action === 'connect')
     {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        if (empty($email) || empty($password))
+        {
+            echo json_encode(['status'=>'error','response'=>'Merci de remplir tous les champs']);
+            exit;
+        }
+
+        $string_verify = "SELECT * FROM users WHERE email=:email";
+        $sth = $connection->prepare($string_verify);
+        $sth->execute([':email' => $email]);
+        $resultat = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        if (password_verify($password, $resultat[0]['password']))
+        {
+            $_SESSION['user_id'] = $resultat[0]['id_user'];
+            echo json_encode(['status' => 'success', 'response' => 'Password match']);
+            exit;
+        }
+        else
+        {
+            echo json_encode(['status' => 'error', 'response' => 'Utilisateur ou mot de passe incorrect']);
+            exit;
+        }
 
     }
 
@@ -66,36 +98,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $fields = [];
             $params = [];
             
-            //On regarde si le paramètre est rempli, si oui on l'ajoute au tableau :
-            if (isset($_POST['title']))
+            //On regarde d'abord si le code est appelé simplement pour terminer la tâche:
+            //Evite de regarder les autres paramètres pour rien:
+            if (isset($_POST['state']) && !empty($_POST['state']))
             {
-                $fields['title'] = 'title = :title';
-                $params['title'] =trim($_POST['title']); 
-            }
-            if (isset($_POST['description']))
-            {
-                $fields['description'] = 'description = :description';
-                $params['description'] = trim($_POST['description']); 
-            }
-            if (isset($_POST['priority']))
-            {
-                $fields['priority'] = 'priority = :priority';
-                $params['priority'] = trim($_POST['priority']); 
-            }
-            if (isset($_POST['target_date']))
-            {
-                $fields['target_date'] = 'target_date = :target_date';
-                $params['target_date'] = trim($_POST['target_date']); 
-            }
-            if(isset($_POST['id']))
-            {
-                $params['id'] = trim($_POST['id']);
+                $fields['state'] = 'state = :state';
+                $params['state'] = trim($_POST['title']);
             }
             else
             {
-                echo json_encode(['status'=>'error','response'=>'id vide']);
-                exit;
+                //On regarde si le paramètre est rempli, si oui on l'ajoute au tableau :
+                if (isset($_POST['title']) && !empty($_POST['title']))
+                {
+                    $fields['title'] = 'title = :title';
+                    $params['title'] =trim($_POST['title']); 
+                }
+                if (isset($_POST['description']) && !empty($_POST['description']))
+                {
+                    $fields['description'] = 'description = :description';
+                    $params['description'] = trim($_POST['description']); 
+                }
+                if (isset($_POST['priority']) && !empty($_POST['priority']))
+                {
+                    $fields['priority'] = 'priority = :priority';
+                    $params['priority'] = trim($_POST['priority']); 
+                }
+                if (isset($_POST['target_date']) && !empty($_POST['target_date']))
+                {
+                    $fields['target_date'] = 'target_date = :target_date';
+                    $params['target_date'] = trim($_POST['target_date']); 
+                }
+                if(isset($_POST['id']) && !empty($_POST['id']))
+                {
+                    $params['id'] = trim($_POST['id']);
+                }
+                else
+                {
+                    echo json_encode(['status'=>'error','response'=>'id vide']);
+                    exit;
+                }
             }
+            
 
             //Si aucun paramètre n'est rempli par l'utilisateur :
             if (empty($fields) || empty($params))

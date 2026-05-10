@@ -23,6 +23,14 @@ form {
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     border-radius:10px;
+    animation: glisser 0.5s ease-out;
+}
+
+#cloned-formulaire, #cloned-note{
+    padding: auto;
+    margin: auto;
+    max-width: 30%;
+    max-height: 70%;
 }
 
 @keyframes glisser {
@@ -46,9 +54,10 @@ form {
 
 
 #connect-form, #inscription-form{
-    margin: 0 auto;
+    margin-top: 50px;
     text-align:center;
     max-width: 400px;
+    max-height: 700px;
     /* ALigner le formulaire au centre de la page */
 
 }
@@ -132,11 +141,18 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background-color: #e5e4e461;
+    /* background-color: #f0eeee61; */
     border-radius: 10px;
     align-items: center;
     min-height:200px;
     margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+
+}
+
+#basse>h2,#moyenne>h2,#haute>h2{
+    font-family:'Segoe UI';
+    font-weight: lighter;
 }
 
 .message{
@@ -156,8 +172,7 @@ textarea {
     width: 90%;
     
 }
-.basse,.moyenne,.haute{
-    /* Background gris clair, bords arrondis et shadowbox */
+ /* .basse,.moyenne,.haute{
     background-color: #f2f2f2;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -166,7 +181,7 @@ textarea {
     text-align: center;
     cursor: pointer;
     transition: 0.3s ease;
-}
+}  */
 
 #popup{
     /* Style pour la balise popup qui contient 2 balises qui doivent apparaître en ligne */
@@ -194,13 +209,15 @@ textarea {
     gap: 10px;
     align-items: center;
 
-    /* Position qui surpasse tous les éléments */
-    z-index: 9999;
+    /* Position en-dessous des autres éléments */
+    z-index: 0;
 }
 
 #popup.open{
     opacity: 1;
     transition: 0.5s ease;
+    /* Position au-dessus de tous les éléments */
+    z-index: 9999;
 }
 
 #popup-body{
@@ -208,3 +225,4 @@ textarea {
     gap: 20px;
     align-items: center;
 }
+

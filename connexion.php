@@ -38,10 +38,10 @@ $string = "SELECT * FROM users WHERE email=:email";
             </div>
         </div>
         </nav>
-
+        <div id="message" style="display:none;"></div>
         <!-- Formulaire de connexion : -->
         <h1>Connexion</h1>
-        <form id="connect-form" action="" method="POST">
+        <form id="connect-form" action="api.php" method="POST">
             <input type="hidden" name="action" value="connect">
             <div class="champ">
                 <label for="email">Adresse mail</label>

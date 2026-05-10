@@ -30,15 +30,15 @@
 
         <!-- Formulaire d'inscription : -->
         <form id="inscription-form" action="api.php" method="POST">
-            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="action" value="create-user">
             <div class="champ">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" name="username" required>
                 <label for="email">Adresse mail</label>
                 <input type="text" id="email" name="email" required>
                 <label for="pwd">Mot de passe</label>
-                <input type="paswword" id="pwd" name="pwd" required>
-                <button type="submit">Connexion</button> <br>
+                <input type="password" id="pwd" name="pwd" required>
+                <button type="submit" class="form-btn">Connexion</button> <br>
             </div>
         </form>
     </body>

@@ -63,7 +63,9 @@ function afficherCategories(notes)
         $categorie.id = priorites[$index];
         //On lui ajoute un titre H2 :
         const categorie_title = document.createElement('h2');
-        categorie_title.textContent = priorites[$index];
+        let title = priorites[$index];
+        title = title[0].toUpperCase()+title.slice(1);
+        categorie_title.textContent = title;
         $categorie.appendChild(categorie_title);
         //On ajoute la categorie à la liste des notes :
         liste_notes.appendChild($categorie);
@@ -476,6 +478,7 @@ const titre_page = document.title;
 //Si le JS est appelé depuis index.html :
 if (titre_page == 'Liste des notes')
 {
+
     afficherNotes();
     construirePopup();
 }
@@ -483,5 +486,30 @@ if (titre_page == 'Liste des notes')
 //Si le JS est appelé depuis connexion.php :
 if (titre_page == 'Connexion')
 {
+    const connect_form = document.querySelector('connect-form');
 
+    //eventListener sur le formulaire:
+    connect_form.addEventListener('submit', async function(evenement){
+        
+        //Pas de rafraîchissement de la page
+        evenement.preventDefault();
+
+        const donnees = new FormData(connect_form);
+
+        const response = await fetch('api.php',{
+            method: 'POST',
+            body: donnees
+        });
+
+        if(response.status == 'error')
+        {
+            afficherMessage(response.response,'text-danger');
+            return;
+        }
+        
+        
+
+
+
+    });
 }
