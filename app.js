@@ -5,6 +5,9 @@ const formulaire = document.getElementById('form-note');
 const message = document.getElementById('message');
 const liste_notes = document.getElementById('liste-notes');
 const popup = document.getElementById('popup');
+const disconnect_btn = document.querySelector('#disconnect-btn');
+// On récupère le titre de la page pour décider de quelle fonction s'exécute :
+const titre_page = document.title;
 
 //Catégories en scope global :
 const notes_basses = null;
@@ -14,22 +17,24 @@ const notes_hautes = null;
 // ---------------------- Définition des fonctions : -------------------------------------------------
 
 
-// Afficher les notes
+//----------------- Afficher les cartes & catégories construites : -----------------
 async function afficherNotes()
 {
     try
     {
         liste_notes.innerHTML = '';
         //On appelle le PHP, GET par défaut :
-        const response = await fetch('api.php');
+        const response = await fetch('api.php', {method: 'GET'});
         const notes = await response.json();
- 
+        console.log(notes);
+
+        if (notes.response = 'Aucun utilisateur')
         //Si aucune note, afficher message :
         if (notes.length == 0)
         {
             liste_notes.innerHTML = '<p>Aucune note pour l\'instant, ajoutez votre première note...</p>';
+            return;
         }
-
         //Créer & afficher les catégories :
         afficherCategories(notes);
 
@@ -41,6 +46,7 @@ async function afficherNotes()
             const current_note_priority = document.getElementById($note.priority);
             current_note_priority.appendChild(current_note);
         });
+        
     }
     catch(erreur)
     {
@@ -48,6 +54,8 @@ async function afficherNotes()
     }
 }
 
+
+//----------------- Afficher les catégories : -----------------
 function afficherCategories(notes)
 {
     //Créer les catégories, permet d'ajouter simplement une categorie si nécessaire
@@ -75,7 +83,7 @@ function afficherCategories(notes)
     });
 }
 
-//Créer les cartes correspondantes aux notes récupérées par le PHP 
+//----------------- Requête vers PHP & création des cartes avec données récupérées : ----------------- 
 function creerCarte(note)
 {
     try
@@ -130,7 +138,7 @@ function creerCarte(note)
         note_card.dataset.target_date = note.target_date;
         //Actions sur la note :
         const delete_note = document.createElement('button');
-        delete_note.className = 'logo-crud';
+        delete_note.classList.add('logo-crud','delete-note');
         delete_note.textContent = '🗑️';
         //EventListener : au clic du bouton on déclenche la fonction supprimerNote
         //en lui passant l'id de la note & la carte :
@@ -138,15 +146,16 @@ function creerCarte(note)
 
         //EventListener : ouvrir un popoup pour modifier la note
         const modify_note = document.createElement('button');
-        modify_note.className = 'logo-crud';
+        modify_note.classList.add('logo-crud','modify-note');
         modify_note.textContent = '📝';
         modify_note.addEventListener('click', ()=>ouvrirPopup(note.id_task));
 
         //Bouton pour marquer la tâche commme terminée :
         //Ce bouton doit désactiver les modifs de la tâche et la rendre verte
         const fulfill_note = document.createElement('button');
-        fulfill_note.className = 'logo-crud';
-        
+        fulfill_note.classList.add('logo-crud','fulfill-note');
+        fulfill_note.textContent = '✔️';
+        fulfill_note.addEventListener('click', () => terminerNote(note.id_task, note_card));
 
         //Ajouter les éléments au body de la card :
         //Plus simple à maintenir, suffit d'ajouter un élément au tableau :
@@ -157,7 +166,8 @@ function creerCarte(note)
             note_priority,
             note_target_date,
             delete_note,
-            modify_note
+            modify_note,
+            fulfill_note
         ];
 
         elements.forEach($element =>{
@@ -178,7 +188,7 @@ function creerCarte(note)
     
 }
 
-//Construction du popup :
+//----------------- Construction du popup & copie du formulaire : -----------------
 function construirePopup()
 {
     //Cloner le formulaire pour éviter le code HTML duppliqué :
@@ -261,7 +271,7 @@ function construirePopup()
     });
 }
 
-//Fonction pour ouvrir un popup en fonction de la tâche
+//----------------- Ouvrir le popup et remplir son contenu : -----------------
 function ouvrirPopup(note_id)
 {
     //On ajoute la classe open au popup :
@@ -294,6 +304,8 @@ function ouvrirPopup(note_id)
     champ_priority.querySelector(`option[value=${selected_priority}]`).setAttribute('selected','');
 }
 
+
+//----------------- Fermer le popup & vider son contenu : -----------------
 function fermerPopup()
 {
     //On enlève la classe open :
@@ -302,7 +314,7 @@ function fermerPopup()
     popup.querySelector('.card').remove();
 }
 
-//Affichage du message dans la div message, avec le contenu & le type envoyé, par défaut success :
+//----------------- Afficher un message dans la div 'message' : -----------------
 function afficherMessage(texte, type = 'text-success')
 {
     const message = document.getElementById('message');
@@ -319,7 +331,7 @@ function afficherMessage(texte, type = 'text-success')
 
 }
 
-//Fonction supprimerNote appelée depuis le bouton correspondant :
+//----------------- Supprimer une note, appelée depuis un bouton : -----------------
 async function supprimerNote(id, card)
 {
     if(!confirm('Supprimer cette note ?')) return;
@@ -361,23 +373,21 @@ async function supprimerNote(id, card)
     }
 }
 
-//Pas besoin de fonction, mais d'un eventListener pour le formulaire de création de note :
-formulaire.addEventListener('submit', async function(evenement)
+//----------------- Terminer une tâche (SQL & visuellement) : -----------------
+async function terminerNote(note_id, note_card)
 {
-    //Pas de rechargement de la page (on évvite le comportement par défaut) : 
+    //Lorsqu'une tâche est terminée, on ne doit plus pouvoir la modifier
+    //Elle doit être mise en valeur pour être reconnaissable
+
+    //Confirmation 
+    if (!confirm('Terminer cette tâche ? \nIl ne sera plus possible de modifier cette tâche')) return;
+
     try
     {
-        evenement.preventDefault();
-
-        const button = document.getElementById('form-btn');
-        //Désactive le bouton pendant l'envoi du formulaire :
-        button.disabled = true;
-        button.textContent = 'Envoi en cours...';
-
-        //On forme les données à l'aide de FormData :
-        const donnees = new FormData(formulaire);
-
-        //Requête vers api.php en POST avec les donnees du formulaire :
+        const donnees = new FormData();
+        donnees.append('id',note_id);
+        donnees.append('action', 'modify-note');
+        donnees.append('state','terminée');
         const response = await fetch('api.php',
             {
                 method: 'POST',
@@ -387,58 +397,106 @@ formulaire.addEventListener('submit', async function(evenement)
 
         const resultat = await response.json();
 
-        //Si une erreur est déclenchée :
         if (resultat.status == 'error')
         {
             afficherMessage(resultat.response, 'text-danger');
             return;
         }
-        console.log(resultat.response.id_task);
-        //On réactive le bouton :
-        button.disabled = false;
-        button.textContent = 'Ajouter la note';
 
-        //Message de débug & clear le formulaire :
-        afficherMessage('Note ajoutée avec succès ! ✅');
-        formulaire.reset();
+        //Supprimer le bouton modifier & terminer: 
+        note_card.querySelector('.fulfill-note').remove();
+        note_card.querySelector('.modify-note').remove();
 
-        //On crée la carte :
-        const response_card = resultat.response;
-        const new_card = creerCarte(response_card);
-
-        //On récupère la priorité de la note (basse, moyenne ou haute) :
-        const new_card_priority= new_card.querySelector('#note-priority');
-        //On veut seulement garder le titre de la catégorie :
-        const priority_title = new_card_priority.textContent.replace('Priorité : ','');
-
-        //On récupère la catégorie portant le même nom :
-        const new_card_categorie = document.getElementById(priority_title);
-        /*
-            insertBefore(nouvelleCarte, listeNotes.firstChild)
-            → insère avant le premier enfant (= en haut de la liste)
-            
-            Si la liste est vide, firstChild = null → appendChild
-        */
-        if (new_card_categorie.firstChild && new_card_categorie.firstChild.tagName !== 'P') 
-        {
-            //Insérer avant le premier élément & après le titre :
-            new_card_categorie.insertBefore(new_card, new_card_categorie.children[1]);
-        } 
-        else 
-        {
-            new_card_categorie.appendChild(nouvelleCarte);
-        }
+        //Modifier les propriétés visuelles :
+        note_card.backgroundColor = 'rgba(44, 147, 65, 0.3)';
     }
     catch (e)
     {
-        afficherMessage(e, 'text-danger');
+        //Gestion erreur :
+        afficherMessage(e,'text-danger');
     }
-    
-});
+}
 
+//----------------- EventListener pour la création de notes : -----------------
+//Ne peut être chargée que depuis Liste des notes
+if (titre_page == 'Liste des notes')
+{
+    formulaire.addEventListener('submit', async function(evenement)
+    {
+        //Pas de rechargement de la page (on évvite le comportement par défaut) : 
+        try
+        {
+            evenement.preventDefault();
 
+            const button = document.getElementById('form-btn');
+            //Désactive le bouton pendant l'envoi du formulaire :
+            button.disabled = true;
+            button.textContent = 'Envoi en cours...';
 
-//Formater la date & heure : 
+            //On forme les données à l'aide de FormData :
+            const donnees = new FormData(formulaire);
+
+            //Requête vers api.php en POST avec les donnees du formulaire :
+            const response = await fetch('api.php',
+                {
+                    method: 'POST',
+                    body: donnees
+                }
+            );
+
+            const resultat = await response.json();
+
+            //Si une erreur est déclenchée :
+            if (resultat.status == 'error')
+            {
+                afficherMessage(resultat.response, 'text-danger');
+                return;
+            }
+            console.log(resultat.response.id_task);
+            //On réactive le bouton :
+            button.disabled = false;
+            button.textContent = 'Ajouter la note';
+
+            //Message de débug & clear le formulaire :
+            afficherMessage('Note ajoutée avec succès ! ✅');
+            formulaire.reset();
+
+            //On crée la carte :
+            const response_card = resultat.response;
+            const new_card = creerCarte(response_card);
+
+            //On récupère la priorité de la note (basse, moyenne ou haute) :
+            const new_card_priority= new_card.querySelector('#note-priority');
+            //On veut seulement garder le titre de la catégorie :
+            const priority_title = new_card_priority.textContent.replace('Priorité : ','');
+
+            //On récupère la catégorie portant le même nom :
+            const new_card_categorie = document.getElementById(priority_title);
+            /*
+                insertBefore(nouvelleCarte, listeNotes.firstChild)
+                → insère avant le premier enfant (= en haut de la liste)
+                
+                Si la liste est vide, firstChild = null → appendChild
+            */
+            if (new_card_categorie.firstChild && new_card_categorie.firstChild.tagName !== 'P') 
+            {
+                //Insérer avant le premier élément & après le titre :
+                new_card_categorie.insertBefore(new_card, new_card_categorie.children[1]);
+            } 
+            else 
+            {
+                new_card_categorie.appendChild(nouvelleCarte);
+            }
+        }
+        catch (e)
+        {
+            afficherMessage(e, 'text-danger');
+        }
+        
+    });
+}
+
+//----------------- Formater date & heure : -----------------
 function formatDateTime (dateStr)
 {
     const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
@@ -451,7 +509,7 @@ function formatDateTime (dateStr)
     });
 }
 
-//Formater la date :
+//----------------- Formater la date : -----------------
 function formatDate(dateStr)
 {
     const date = new Date(dateStr.replace(' ', 'T')); // ISO 8601
@@ -462,54 +520,138 @@ function formatDate(dateStr)
     });
 }
 
-//Enlever le format appliqué :
-function unformatDate(dateStr)
+//----------------- Déconnexion via bouton : -----------------
+disconnect_btn.addEventListener('click',async function(evenement){
+    try
+    {
+        evenement.preventDefault();
+        if (!confirm('Confirmer la déconnexion ?')) return;
+        donnees = new FormData();
+        donnees.append('action','disconnect');
+        const response = await fetch('api.php',
+            {
+                method: 'POST',
+                body: donnees
+            }
+        );
+        const resultat = await response.json();
+        if (resultat.status == 'error')
+        {
+            afficherMessage(resultat.response,'text-danger');
+            return;
+        }
+        document.location.href = 'connexion.php';
+
+    }
+    catch (e)
+    {
+        afficherMessage(e,'text-danger');
+    }
+    
+});
+
+
+//----------------- Vérifier connexion utilisateur : -----------------
+
+//Comme on n'appelle que le JS depuis l'HTML, la sécurité est très limitée, car le JS n'est appelé qu'après le code HTML
+//Si on avait voulu une sécurité optimale, on aurait implémenté du PHP pour vérifier la session car exécuté côté serveur
+//Et exécuté avant le code HTML
+async function verifConnection()
 {
-    //Enlever '📅 Date de rendue : '
-    const date = new Date(dateStr.replace('📅 Date de rendue : ',''));
-    return date.toLocaleDateString('fr-FR',{ dateStyle: 'short' });
+    try
+    {
+        const donnees = new FormData();
+        donnees.append('action','verify-connection');
+        const response = await fetch('api.php',
+        {
+            method: 'POST',
+            body: donnees
+        });
+        resultat = await response.json();
+        //S'il y a une erreur, ou utilisateur non connecté, rediriger vers connexion.php :
+        if (resultat.status == 'error')
+        {
+            //Double sécurité car déjà une redirection côté PHP:
+            document.location.href = 'connexion.php';
+        }
+        document.querySelector('#message-accueil').textContent = '📝 Liste des notes de '+resultat.response.username;
+    }
+    catch (e)
+    {
+        afficherMessage (e,'text-danger');
+    }
 }
 
 // ---------------------- Code principal : -----------------------------------------------------------
 
-// On récupère le titre de la page pour décider de quelle fonction s'exécute :
-const titre_page = document.title;
-
 //Si le JS est appelé depuis index.html :
 if (titre_page == 'Liste des notes')
 {
-
+    verifConnection();
     afficherNotes();
     construirePopup();
 }
 
 //Si le JS est appelé depuis connexion.php :
-if (titre_page == 'Connexion')
+else if (titre_page == 'Connexion')
 {
-    const connect_form = document.querySelector('connect-form');
-
+    const connect_form = document.querySelector('#connect-form');
     //eventListener sur le formulaire:
     connect_form.addEventListener('submit', async function(evenement){
-        
-        //Pas de rafraîchissement de la page
-        evenement.preventDefault();
-
-        const donnees = new FormData(connect_form);
-
-        const response = await fetch('api.php',{
-            method: 'POST',
-            body: donnees
-        });
-
-        if(response.status == 'error')
+        try
         {
-            afficherMessage(response.response,'text-danger');
-            return;
+            evenement.preventDefault();
+            const donnees = new FormData(connect_form);
+            const response = await fetch('api.php',{
+                method: 'POST',
+                body: donnees
+            });
+            resultat = await response.json();
+            if(resultat.status == 'success' && resultat.response == 'Password match')
+            {
+                document.location.href = 'index.html';
+            }
+            else
+            {
+                afficherMessage(resultat.response,'text-danger');
+            }
         }
-        
-        
+        catch (e)
+        {
+            afficherMessage(e,'text-danger');
+        }
+    });
+}
 
+else if (titre_page == 'Inscription')
+{
+    afficherMessage('Page Inscription')
+    const inscription_form = document.querySelector('#inscription-form');
+    //eventListener sur le formulaire:
+    inscription_form.addEventListener('submit', async function(evenement){
+        try
+        {
+            evenement.preventDefault();
 
-
+            const donnees = new FormData(inscription_form);
+            const response = await fetch('api.php',{
+                method: 'POST',
+                body: donnees
+            });
+            resultat = await response.json();
+            if(resultat.status == 'success')
+            {
+                afficherMessage(resultat.response,'text-success');
+            }
+            else
+            {
+                afficherMessage(resultat.response,'text-danger');
+            }
+            inscription_form.reset();
+        }
+        catch (e)
+        {
+            afficherMessage(e,'text-danger');
+        }
     });
 }

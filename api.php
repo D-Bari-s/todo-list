@@ -7,6 +7,8 @@ require_once "config.php";
 header('Content-Type: application/json; charset=utf-8;');
 header('Access-Control-Allow-Origin: *;');
 
+//Indispensable pour utiliser les sessions :
+session_start();
 
 //Pour toutes les requêtes POST :
 if ($_SERVER['REQUEST_METHOD'] === 'POST')
@@ -38,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             //On retourne le même message si un user est trouvé
             //Permet de ne pas donner de piste à un HACKER MALVEILLANT
-            echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou username n\'est trouvée, le compte sera créé.']);
+            echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou utilisateur n\'est trouvée, le compte sera créé.']);
             exit;
         }
 
@@ -52,17 +54,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             ':username' => $username,
             ':pwd' => $pwd]);
 
-        header('Location: connexion.php');
-        echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou username n\'est trouvée, le compte sera créé.']);
+        echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou utilisateur n\'est trouvée, le compte sera créé.']);
         exit;
 
     }
-    
+    if ($action === 'disconnect')
+    {
+        unset($_SESSION['user_id']);
+        unset($_SESSION['user']);
+
+        echo json_encode(['status'=>'success','response'=>'Disconnected']);
+    }
     //Si le PHP est appelé depuis la connexion :
     if ($action === 'connect')
     {
         $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $password = $_POST['pwd'] ?? '';
 
         if (empty($email) || empty($password))
         {
@@ -74,17 +81,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         $sth = $connection->prepare($string_verify);
         $sth->execute([':email' => $email]);
         $resultat = $sth->fetchAll(PDO::FETCH_ASSOC);
-
-        if (password_verify($password, $resultat[0]['password']))
+        if (count($resultat) == 0)
+        {
+            echo json_encode(['status' => 'error', 'response' => 'Mail ou mot de passe incorrect']);
+            exit;
+        }
+        else if (password_verify($password, $resultat[0]['password']))
         {
             $_SESSION['user_id'] = $resultat[0]['id_user'];
+            $_SESSION['user'] = $resultat[0]['username'];
             echo json_encode(['status' => 'success', 'response' => 'Password match']);
+            exit;
+        }
+        
+
+    }
+
+    //Vérfier la connexion :
+    if($action === 'verify-connection')
+    {
+        if (empty($_SESSION['user_id']))
+        {
+            echo json_encode(['status'=>'error','response'=>'Aucun utilisateur connecté']);
             exit;
         }
         else
         {
-            echo json_encode(['status' => 'error', 'response' => 'Utilisateur ou mot de passe incorrect']);
-            exit;
+            echo json_encode(['status'=>'success',
+            'response'=>
+            [
+                'user_id'=> $_SESSION['user_id'],
+                'username' => $_SESSION['user']
+            ]]);
         }
 
     }
@@ -103,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             if (isset($_POST['state']) && !empty($_POST['state']))
             {
                 $fields['state'] = 'state = :state';
-                $params['state'] = trim($_POST['title']);
+                $params['state'] = trim($_POST['state']);
             }
             else
             {
@@ -180,24 +208,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $description = trim($_POST['description']) ?? '';
             $priority = trim($_POST['priority']) ?? '';
             $target_date = trim($_POST['target_date']) ?? '';
+            $user_id = $_SESSION['user_id'] ?? '';
 
             //Vérification des paramètres :
-            if (empty($title) ||empty($description) ||empty($priority) ||empty($target_date))
+            if (empty($title) ||empty($description) ||empty($priority) ||empty($target_date) || empty($user_id))
             {
                 echo json_encode(['status'=>'error','response'=>'Merci de remplir tous les paramètres']);
                 exit;
             }
 
             //Préparation & exécution de la requête :
-            $string_create = "INSERT INTO tasks(title,description,priority,target_date)
-            VALUES (:title,:description,:priority,:target_date)";
+            $string_create = "INSERT INTO tasks(title,description,priority,target_date,user_id)
+            VALUES (:title,:description,:priority,:target_date,:user_id)";
 
             $sth = $connection->prepare($string_create);
             $sth->execute([
                 ':title' => $title,
                 ':description' => $description,
                 ':priority' => $priority,
-                ':target_date' => $target_date
+                ':target_date' => $target_date,
+                ':user_id' => $user_id
             ]);
 
             //On récupère le dernier id inséré via la connexion :
@@ -244,6 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $sth = $connection->prepare($delete_string);
             $sth->execute([':id'=>$id]);
 
+            
             echo json_encode(['status'=>'success','response'=>'Tâche supprimée !']);
             exit;
         }
@@ -258,25 +289,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 //Si le php est appelé depuis la fonction d'affichage des notes :
 if ($_SERVER['REQUEST_METHOD'] === 'GET')
 {
-    //Une seule requête en GET pour afficher les notes, pas besoin de vérifier l'action :
-    // $user_id = $_SESSION['id'] ?? '';
+    $user_id = $_SESSION['user_id'] ?? '';
 
-    // if ($user_id == '')
-    // {
-    //     echo json_encode(['erreur' => 'id vide']);
-    //     exit;
-    // }
+    if ($user_id == '')
+    {
+        echo json_encode(['status' => 'error', 'response' => 'Aucun utilisateur']);
+        exit;
+    }
     
-    //$string_notes = "SELECT * FROM tasks WHERE user_id = :id";
-    $string_notes = "SELECT * FROM tasks";
+    $string_notes = "SELECT * FROM tasks WHERE user_id = :id";
+
     $sth = $connection->prepare($string_notes);
-    $sth->execute();
+    $sth->execute([':id' => $user_id]);
     //On récupère un tableau associatif :
     $notes = $sth->fetchAll(PDO::FETCH_ASSOC);
-
     echo json_encode($notes);
     exit;
-    //$sth->execute($user_id);
+
     
     
 }

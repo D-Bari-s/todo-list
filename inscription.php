@@ -20,14 +20,14 @@
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="index.html">Notes</a>
                 <a class="nav-link" aria-current="page" href="connexion.php">Connexion</a>
-                <a class="nav-link" href="#">Déconnexion - A changer pour gérer via PHP</a>
+                <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion - A changer pour gérer via PHP</a>
             </div>
             </div>
         </div>
         </nav>
 
         <h1>Inscription</h1>
-
+        <div id="message" style="display:none;"></div>
         <!-- Formulaire d'inscription : -->
         <form id="inscription-form" action="api.php" method="POST">
             <input type="hidden" name="action" value="create-user">
@@ -38,8 +38,9 @@
                 <input type="text" id="email" name="email" required>
                 <label for="pwd">Mot de passe</label>
                 <input type="password" id="pwd" name="pwd" required>
-                <button type="submit" class="form-btn">Connexion</button> <br>
+                <button type="submit" class="form-btn">Créer le compte</button> <br>
             </div>
         </form>
+        <script src="app.js"></script>
     </body>
 </html>

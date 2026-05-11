@@ -1,9 +1,17 @@
 
+.nav-btn
+{
+
+    background-color: rgba(0,0,0,0.0);
+    border: none;
+}
+
 h1 {
     text-align: center;
 }
 h2{
-    font-family:'Segoe UI', 'light', sans-serif;
+    font-family:'Segoe UI';
+    font-weight: lighter;
 }
 
 #message{
@@ -16,6 +24,7 @@ h2{
     animation: glisser 0.5s ease-in-out;
     font-size: 20px;
 }
+
 
 form {
     max-width: 600px;
