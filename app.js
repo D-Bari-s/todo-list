@@ -64,19 +64,19 @@ function afficherCategories(filtre = "priorite")
 
     //Parcours des categories :
     categories.forEach($categorie =>{
-        //On crée la catégorie avec la classe associée :
-        $categorie = document.createElement('div');
-        $categorie.id = priorites[$index];
-        //On lui ajoute un titre H2 :
-        const categorie_title = document.createElement('h2');
-        let title = priorites[$index];
-        title = title[0].toUpperCase()+title.slice(1);
-        categorie_title.textContent = title;
-        $categorie.appendChild(categorie_title);
-        //On ajoute la categorie à la liste des notes :
-        liste_notes.appendChild($categorie);
-        //On incrémente l'index :
-        $index++;
+    //On crée la catégorie avec la classe associée :
+    $categorie = document.createElement('div');
+    $categorie.id = priorites[$index];
+    //On lui ajoute un titre H2 :
+    const categorie_title = document.createElement('h2');
+    let title = priorites[$index];
+    title = title[0].toUpperCase()+title.slice(1);
+    categorie_title.textContent = title;
+    $categorie.appendChild(categorie_title);
+    //On ajoute la categorie à la liste des notes :
+    liste_notes.appendChild($categorie);
+    //On incrémente l'index :
+    $index++;
         
     });
 }
@@ -276,10 +276,6 @@ function construirePopup()
         {
             afficherMessage(e, 'text-danger');
         }
-        
-
-
-        
     });
 }
 

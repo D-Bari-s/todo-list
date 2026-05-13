@@ -35,13 +35,6 @@ form {
     animation: glisser 0.5s ease-out;
 }
 
-#cloned-formulaire, #cloned-note{
-    padding: auto;
-    margin: auto;
-    max-width: 30%;
-    max-height: 70%;
-}
-
 @keyframes glisser {
   from {
     opacity: 0;
@@ -181,16 +174,6 @@ textarea {
     width: 90%;
     
 }
- /* .basse,.moyenne,.haute{
-    background-color: #f2f2f2;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    margin: 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s ease;
-}  */
 
 #popup{
     /* Style pour la balise popup qui contient 2 balises qui doivent apparaître en ligne */
@@ -233,5 +216,12 @@ textarea {
     display: flex;
     gap: 20px;
     align-items: center;
+}
+
+#cloned-formulaire, #cloned-note{
+    padding: auto;
+    margin: auto;
+    max-width: 30%;
+    max-height: 70%;
 }
 
