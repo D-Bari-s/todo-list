@@ -26,9 +26,7 @@ async function afficherNotes()
         //On appelle le PHP, GET par défaut :
         const response = await fetch('api.php', {method: 'GET'});
         const notes = await response.json();
-        console.log(notes);
 
-        if (notes.response = 'Aucun utilisateur')
         //Si aucune note, afficher message :
         if (notes.length == 0)
         {
@@ -36,7 +34,7 @@ async function afficherNotes()
             return;
         }
         //Créer & afficher les catégories :
-        afficherCategories(notes);
+        afficherCategories();
 
         //Sinon, créer les notes :
         notes.forEach($note =>{
@@ -56,7 +54,7 @@ async function afficherNotes()
 
 
 //----------------- Afficher les catégories : -----------------
-function afficherCategories(notes)
+function afficherCategories(filtre = "priorite")
 {
     //Créer les catégories, permet d'ajouter simplement une categorie si nécessaire
     //en gardant le scope global :
@@ -115,27 +113,36 @@ function creerCarte(note)
         note_description.className = 'note-description';
         note_description.textContent = note.description;
         
-        //Statut de la note :
-        const note_state = document.createElement('p');
-        note_state.className = 'note-state';
-        note_state.textContent = note.state;
-
         //Priorité de la note :
         const note_priority = document.createElement('p');
         note_priority.id = 'note-priority';
         note_priority.textContent = 'Priorité : '+note.priority;
+
+        //Statut de la note :
+        const note_state = document.createElement('h5');
+        note_state.className = 'note-state';
+        note_state.textContent = note.state[0].toUpperCase()+note.state.slice(1);
+        const is_finished = note.state == 'terminée';
+        note_card.style.backgroundColor = is_finished ? 'rgba(80, 173, 108, 0.2)' : 'white';
+        note_state.style.color = is_finished ? 'rgb(48, 119, 69)' : 'black';
+        
         //Date de rendue :
         const note_target_date = document.createElement('p');
-        //Permet de mettre en évidence si la date de rendue est dépassée :
-        const is_late = new Date(note.target_date) < Date.now();
-        //Si la note est en retard, en évidence :
-        note_target_date.className = is_late ? 'text-danger' : 'text-success';
-        note_target_date.classList.add('target-date');
-        note_card.style.backgroundColor = is_late ? 'rgba(248, 8, 8, 0.2)' : 'white';
         // Texte :
         note_target_date.textContent = `📅 Date de rendue : ${formatDate(note.target_date)}`;
         //Ajout de la date de rendue au dataset pour l'ajouter dans le popup:
         note_card.dataset.target_date = note.target_date;
+        //Si la note est en cours :
+        if (note.state != 'terminée')
+        {
+            //Permet de mettre en évidence si la date de rendue est dépassée :
+            const is_late = new Date(note.target_date) < Date.now();
+            //Si la note est en retard, en évidence :
+            note_target_date.className = is_late ? 'text-danger' : 'text-success';
+            note_card.style.backgroundColor = is_late ? 'rgba(248, 8, 8, 0.2)' : 'white';
+        }
+        note_target_date.classList.add('target-date');
+
         //Actions sur la note :
         const delete_note = document.createElement('button');
         delete_note.classList.add('logo-crud','delete-note');
@@ -143,19 +150,6 @@ function creerCarte(note)
         //EventListener : au clic du bouton on déclenche la fonction supprimerNote
         //en lui passant l'id de la note & la carte :
         delete_note.addEventListener('click', ()=>supprimerNote(note.id_task, note_card));
-
-        //EventListener : ouvrir un popoup pour modifier la note
-        const modify_note = document.createElement('button');
-        modify_note.classList.add('logo-crud','modify-note');
-        modify_note.textContent = '📝';
-        modify_note.addEventListener('click', ()=>ouvrirPopup(note.id_task));
-
-        //Bouton pour marquer la tâche commme terminée :
-        //Ce bouton doit désactiver les modifs de la tâche et la rendre verte
-        const fulfill_note = document.createElement('button');
-        fulfill_note.classList.add('logo-crud','fulfill-note');
-        fulfill_note.textContent = '✔️';
-        fulfill_note.addEventListener('click', () => terminerNote(note.id_task, note_card));
 
         //Ajouter les éléments au body de la card :
         //Plus simple à maintenir, suffit d'ajouter un élément au tableau :
@@ -165,14 +159,32 @@ function creerCarte(note)
             note_state,
             note_priority,
             note_target_date,
-            delete_note,
-            modify_note,
-            fulfill_note
+            delete_note
         ];
 
         elements.forEach($element =>{
             note_body.appendChild($element);
         });
+
+        //On ajoute les boutons à la fin de la card uniquement si la tâche n'est pas terminée :
+        if (!is_finished)
+        {
+            //EventListener : ouvrir un popoup pour modifier la note
+            const modify_note = document.createElement('button');
+            modify_note.classList.add('logo-crud','modify-note');
+            modify_note.textContent = '📝';
+            modify_note.addEventListener('click', ()=>ouvrirPopup(note.id_task));
+            note_body.appendChild(modify_note);
+
+            //Bouton pour marquer la tâche commme terminée :
+            //Ce bouton doit désactiver les modifs de la tâche et la rendre verte
+            const fulfill_note = document.createElement('button');
+            fulfill_note.classList.add('logo-crud','fulfill-note');
+            fulfill_note.textContent = '✔️';
+            fulfill_note.addEventListener('click', () => terminerNote(note.id_task, note_card));
+            note_body.appendChild(fulfill_note);
+        }
+
 
         //On ajoute le header & le body à la carte :
         note_card.appendChild(note_header);
@@ -409,6 +421,10 @@ async function terminerNote(note_id, note_card)
 
         //Modifier les propriétés visuelles :
         note_card.backgroundColor = 'rgba(44, 147, 65, 0.3)';
+
+        //Affichage: 
+        afficherNotes();
+        afficherMessage('Note terminée avec succès ! ✅');
     }
     catch (e)
     {

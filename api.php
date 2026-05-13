@@ -156,17 +156,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                     $fields['target_date'] = 'target_date = :target_date';
                     $params['target_date'] = trim($_POST['target_date']); 
                 }
-                if(isset($_POST['id']) && !empty($_POST['id']))
-                {
-                    $params['id'] = trim($_POST['id']);
-                }
-                else
-                {
-                    echo json_encode(['status'=>'error','response'=>'id vide']);
-                    exit;
-                }
             }
-            
+            if(isset($_POST['id']) && !empty($_POST['id']))
+            {
+                $params['id'] = trim($_POST['id']);
+            }
+            else
+            {
+                echo json_encode(['status'=>'error','response'=>'id vide']);
+                exit;
+            }
 
             //Si aucun paramètre n'est rempli par l'utilisateur :
             if (empty($fields) || empty($params))
@@ -175,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 exit;
             }
 
-            //On concatène les paramètres à modifier en un seul string, séparés par une virgule :
+            //On concatène les paramètres à modifier en un seul string, séparés par une virgule, s'il y en a plus d'un :
             $imploded_fields = implode(",",$fields);
 
             //On prépare & on exécute la requête : 
