@@ -74,6 +74,26 @@
     </form>
     <!-- Message feedback : -->
     <div id="message" class="message" style="display:none;"></div>
+    <div id="filtre">
+      <h3>Filtrer par :</h3>
+      <div id="priority-filter">
+        <h5>Priorité :</h5>
+        <select id="priority-select">
+          <option value="basse" class="text-success">Basse</option>
+          <option value="moyenne" class="text-warning">Moyenne</option>
+          <option value="haute" class="text-danger">Haute</option>
+          <option value="all">Toutes</option>
+        </select>
+      </div>
+      <div id="state-filter">
+        <h5>Etat :</h5>
+        <select id="state-select">
+          <option value="en cours">En cours</option>
+          <option value="terminée">Terminées</option>
+          <option value="all">Toutes</option>
+        </select>
+      </div>
+    </div>
     <div id="overlay">
       <div id="popup">
         <h3>Modifier la note</h3>
