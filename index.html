@@ -21,7 +21,7 @@
           <div class="navbar-nav">
             <a class="nav-link active" aria-current="page" href="index.html">Notes</a>
             <a class="nav-link" aria-current="page" href="connexion.php">Connexion</a>
-            <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion - A changer pour gérer via PHP</a>
+            <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion</a>
           </div>
         </div>
       </div>
@@ -74,20 +74,21 @@
     </form>
     <!-- Message feedback : -->
     <div id="message" class="message" style="display:none;"></div>
-    <div id="popup">
-      <h3>Modifier la note</h3>
-      <div id="popup-body">
-        <div id="popup-actuel">
-        <!-- La note choisie sera injectée ici -->
+    <div id="overlay">
+      <div id="popup">
+        <h3>Modifier la note</h3>
+        <div id="popup-body">
+          <div id="popup-actuel">
+          <!-- La note choisie sera injectée ici -->
 
-        </div>
-        <div id="popup-modif">
-          <!-- Les champs de modification apparaîtront ici, on copie le formulaire en changeant l'action du bouton -->
+          </div>
+          <div id="popup-modif">
+            <!-- Les champs de modification apparaîtront ici, on copie le formulaire en changeant l'action du bouton -->
 
+          </div>
         </div>
       </div>
-      
-    </div>
+      </div>
     <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
     <div id="liste-notes">
       <!-- Les notes seront injectées ici par PHP ou par JavaScript -->

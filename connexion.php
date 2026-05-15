@@ -33,7 +33,7 @@ $string = "SELECT * FROM users WHERE email=:email";
                 <div class="navbar-nav">
                     <a class="nav-link" aria-current="page" href="index.html">Notes</a>
                     <a class="nav-link active" aria-current="page" href="connexion.php">Connexion</a>
-                    <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion - A changer pour gérer via PHP</a>
+                    <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion</a>
                 </div>
             </div>
         </div>

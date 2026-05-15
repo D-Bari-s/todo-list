@@ -18,9 +18,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link active" aria-current="page" href="index.html">Notes</a>
-                <a class="nav-link" aria-current="page" href="connexion.php">Connexion</a>
-                <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion - A changer pour gérer via PHP</a>
+                <a class="nav-link" aria-current="page" href="index.html">Notes</a>
+                <a class="nav-link active" aria-current="page" href="connexion.php">Connexion</a>
+                <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion</a>
             </div>
             </div>
         </div>
