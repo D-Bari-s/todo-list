@@ -47,7 +47,7 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
         if (per_page != null) params.push(`per_page=${per_page}`);
 
         const string_fetch = 'api.php?'+params.join('&');
-        console.log(string_fetch);
+        
         //On appelle le PHP, GET par défaut :
         const response = await fetch(
             string_fetch, 
@@ -65,16 +65,16 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
             liste_notes.innerHTML = '<p>Aucune note pour l\'instant, ajoutez votre première note...</p>';
             return;
         }
-        //Créer & afficher les catégories :
-        afficherCategories();
 
         //Sinon, créer les notes :
         notes.forEach($note =>{
             //Créer la carte :
             const current_note = creerCarte($note);
-            //Trouver la catégorie associée et y ajouter la carte
-            const current_note_priority = document.getElementById($note.priority);
-            current_note_priority.appendChild(current_note);
+            //Gérer l'affichage des cards avec Bootstrap :
+            const col = document.createElement('div');
+            col.classList.add('col');
+            col.appendChild(current_note);
+            liste_notes.appendChild(col);
         });
         
     }
@@ -82,37 +82,6 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
     {
         console.log(erreur.message);
     }
-}
-
-
-//----------------- Afficher les catégories : -----------------
-function afficherCategories(filter = 'none', value = 'none')
-{
-    //Créer les catégories, permet d'ajouter simplement une categorie si nécessaire
-    //en gardant le scope global :
-    document.querySelector('#liste-notes').innerHTML = '';
-
-    const priorites = ['basse','moyenne','haute'];
-    $index = 0;
-    const categories = [notes_basses,notes_moyennes,notes_hautes];
-
-    //Parcours des categories :
-    categories.forEach($categorie =>{
-    //On crée la catégorie avec la classe associée :
-    $categorie = document.createElement('div');
-    $categorie.id = priorites[$index];
-    //On lui ajoute un titre H2 :
-    const categorie_title = document.createElement('h2');
-    let title = priorites[$index];
-    title = title[0].toUpperCase()+title.slice(1);
-    categorie_title.textContent = title;
-    $categorie.appendChild(categorie_title);
-    //On ajoute la categorie à la liste des notes :
-    liste_notes.appendChild($categorie);
-    //On incrémente l'index :
-    $index++;
-        
-    });
 }
 
 //----------------- Requête vers PHP & création des cartes avec données récupérées : ----------------- 
@@ -561,6 +530,14 @@ if (titre_page == 'Liste des notes')
     //On appelle afficherNotes en lui passant les paramètres choisis :
     const state_select = document.querySelector('#state-select');
     state_select.addEventListener('change', () => afficherNotes());
+
+    //------------ eventListener sur le formulaire de tri ------------
+    const ordre_form = document.querySelector('#ordre-form');
+    ordre_form.addEventListener('submit', function(evenement){
+        evenement.preventDefault();
+        const donnees = new FormData(ordre_form);
+        console.log(donnees);
+    });
 }
 
 //----------------- Formater date & heure : -----------------

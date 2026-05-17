@@ -17,45 +17,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     //Si le PHP est appelé depuis la création d'un nouvel user :
     if ($action === 'create-user')
     {
-        // On récupère les données envoyées en POST via le formulaire :
-        $username = $_POST['username'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $pwd = $_POST['pwd'] ?? '';
-        if (empty($username) || empty($email) || empty($pwd))
+        try
         {
-            echo json_encode(['status'=>'error','message' => 'merci de remplir les champs nécessaires']);
-            exit;
-        }
-        //On vérifie que l'email & l'username soient unique :
-        $verif_string = "SELECT * FROM users WHERE email=:email OR username=:username";
+            // On récupère les données envoyées en POST via le formulaire :
+            $username = $_POST['username'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $pwd = $_POST['pwd'] ?? '';
+            if (empty($username) || empty($email) || empty($pwd))
+            {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message' => 'merci de remplir les champs nécessaires']);
+                exit;
+            }
+            //On vérifie que l'email & l'username soient unique :
+            $verif_string = "SELECT * FROM users WHERE email=:email OR username=:username";
 
-        $sth = $connection->prepare($verif_string);
-        $sth->execute([
-            ':email' => $email,
-            ':username' => $username]);
-        $verif = $sth->fetchAll();
-        
-        //Si un email ou username est déjà existant :
-        if (count($verif) > 0)
-        {
-            //On retourne le même message si un user est trouvé
-            //Permet de ne pas donner de piste à un HACKER MALVEILLANT
+            $sth = $connection->prepare($verif_string);
+            $sth->execute([
+                ':email' => $email,
+                ':username' => $username]);
+            $verif = $sth->fetchAll();
+            
+            //Si un email ou username est déjà existant :
+            if (count($verif) > 0)
+            {
+                //On retourne le même message si un user est trouvé
+                //Permet de ne pas donner de piste à un HACKER MALVEILLANT
+                echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou utilisateur n\'est trouvée, le compte sera créé.']);
+                exit;
+            }
+
+            //Sinon on ajoute l'utilisateur à la base :
+            //Requête préparée avec paramètres nommés :
+            $string = "INSERT INTO users(email,username,password) VALUES(:email,:username,:pwd);";
+            $sth = $connection->prepare($string);
+            $pwd = password_hash($pwd,PASSWORD_BCRYPT);
+            $sth->execute([
+                ':email' => $email,
+                ':username' => $username,
+                ':pwd' => $pwd]);
+
             echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou utilisateur n\'est trouvée, le compte sera créé.']);
             exit;
         }
-
-        //Sinon on ajoute l'utilisateur à la base :
-        //Requête préparée avec paramètres nommés :
-        $string = "INSERT INTO users(email,username,password) VALUES(:email,:username,:pwd);";
-        $sth = $connection->prepare($string);
-        $pwd = password_hash($pwd,PASSWORD_BCRYPT);
-        $sth->execute([
-            ':email' => $email,
-            ':username' => $username,
-            ':pwd' => $pwd]);
-
-        echo json_encode(['status'=>'success','response' => 'Si aucune adresse mail ou utilisateur n\'est trouvée, le compte sera créé.']);
-        exit;
+        catch (PDOException $ex)
+        {
+            http_response_code(500);
+            echo json_encode($ex->getMessage());
+            exit;
+        }
+        
 
     }
     if ($action === 'disconnect')
@@ -68,33 +79,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     //Si le PHP est appelé depuis la connexion :
     if ($action === 'connect')
     {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['pwd'] ?? '';
+        try
+        {
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['pwd'] ?? '';
 
-        if (empty($email) || empty($password))
-        {
-            echo json_encode(['status'=>'error','response'=>'Merci de remplir tous les champs']);
-            exit;
-        }
+            if (empty($email) || empty($password))
+            {
+                //Bad request :
+                http_response_code(400);
+                echo json_encode(['status'=>'error','response'=>'Merci de remplir tous les champs']);
+                exit;
+            }
 
-        $string_verify = "SELECT * FROM users WHERE email=:email";
-        $sth = $connection->prepare($string_verify);
-        $sth->execute([':email' => $email]);
-        $resultat = $sth->fetchAll(PDO::FETCH_ASSOC);
-        if (count($resultat) == 0)
-        {
-            echo json_encode(['status' => 'error', 'response' => 'Mail ou mot de passe incorrect']);
-            exit;
-        }
-        else if (password_verify($password, $resultat[0]['password']))
-        {
-            $_SESSION['user_id'] = $resultat[0]['id_user'];
-            $_SESSION['user'] = $resultat[0]['username'];
-            echo json_encode(['status' => 'success', 'response' => 'Password match']);
-            exit;
-        }
+            $string_verify = "SELECT * FROM users WHERE email=:email";
+            $sth = $connection->prepare($string_verify);
+            $sth->execute([':email' => $email]);
+            $resultat = $sth->fetchAll(PDO::FETCH_ASSOC);
+            if (count($resultat) == 0)
+            {
+                //Unauthorized :
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'response' => 'Mail ou mot de passe incorrect']);
+                exit;
+            }
+            else if (password_verify($password, $resultat[0]['password']))
+            {
+                $_SESSION['user_id'] = $resultat[0]['id_user'];
+                $_SESSION['user'] = $resultat[0]['username'];
+                echo json_encode(['status' => 'success', 'response' => 'Password match']);
+                exit;
+            }
         
-
+        }
+        catch (PDOException $ex)
+        {
+            //Internal error :
+            http_response_code(500);
+            echo json_encode($ex->getMessage());
+            exit;
+        }
     }
 
     //Vérfier la connexion :
@@ -102,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     {
         if (empty($_SESSION['user_id']))
         {
+            http_response_code(401);
             echo json_encode(['status'=>'error','response'=>'Aucun utilisateur connecté']);
             exit;
         }
@@ -163,6 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             }
             else
             {
+                http_response_code(400);
                 echo json_encode(['status'=>'error','response'=>'id vide']);
                 exit;
             }
@@ -170,6 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             //Si aucun paramètre n'est rempli par l'utilisateur :
             if (empty($fields) || empty($params))
             {
+                http_response_code(400);
                 echo json_encode(['status' => 'error', 'response' => 'Merci de remplir au moins un champ']);
                 exit;
             }
@@ -188,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         }
         catch (PDOException $e)
         {
+            http_response_code(500);
             echo json_encode(['status'=>'error', 'response' => $e->getMessage()]);
             exit;
         }      
@@ -212,6 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             //Vérification des paramètres :
             if (empty($title) ||empty($description) ||empty($priority) ||empty($target_date) || empty($user_id))
             {
+                http_response_code(400);
                 echo json_encode(['status'=>'error','response'=>'Merci de remplir tous les paramètres']);
                 exit;
             }
@@ -261,6 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         }
         catch(PDOException $e)
         {
+            http_response_code(500);
             echo json_encode(['status'=>'error','response'=>$e->getMessage()]);
         }
     }
@@ -279,6 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
         }
         catch (PDOException $e)
         {
+            http_response_code(500);
             echo json_encode(['status'=>'error','response'=>$e->getMessage()]);
             exit;
         }
@@ -292,6 +323,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
     {
         //On récupère les paramètres passés par le JS :
         $user_id = $_SESSION['user_id'] ?? '';
+        if ($user_id == '')
+        {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'response' => 'Aucun utilisateur']);
+            exit;
+        }
         $state = $_GET['state'] ?? '';
         $priority = $_GET['priority'] ?? '';
         //Par défaut page 1 avec 100 notes affichées :
@@ -302,11 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
         $per_page = (int)($_GET['per_page'] ?? 100);
         //Si page == 0 -> pas d'offset :
         $offset = ($page - 1) * $per_page;
-        if ($user_id == '')
-        {
-            echo json_encode(['status' => 'error', 'response' => 'Aucun utilisateur']);
-            exit;
-        }
+        
         
         //On construit la requête de base :
         $string_notes = "SELECT * FROM tasks WHERE user_id = :id";
@@ -341,6 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
     }
     catch (PDOException $ex)
     {
+        http_response_code(500);
         echo json_encode(['status' => 'error' , 'response' => $ex->getMessage()]);
         exit;
     }

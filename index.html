@@ -76,23 +76,25 @@
     <div id="message" class="message" style="display:none;"></div>
     <div id ="ordre-filtre">
       <div id="ordre" class="card border-light mb-3 text-center">
-        <h3 id="ordre-title" class="card-header">Classement</h3>
-        <div id="ordre-body" class="card-body d-flex justify-content-center align-items-center">
-          <div id="ordre-created-at">
-            <h5>Date de création</h5>
-            <button type="submit" id="created-at-asc" class="btn-order">▲</button> 
-            <button type="submit" id="created-at-desc" class="btn-order">▼</button> 
-          </div>
-          <div id="ordre-created-at">
-            <h5>Date de rendue</h5>
-            <button type="submit" id="target-date-asc" class="btn-order">▲</button> 
-            <button type="submit" id="target-date-desc" class="btn-order">▼</button> 
-          </div>
-          <div id="ordre-created-at">
-            <h5>Priorité</h5>
-            <button type="submit" id="priority-asc" class="btn-order">▲</button> 
-            <button type="submit" id="priority-desc" class="btn-order">▼</button> 
-          </div>
+        <h3 id="ordre-title" class="card-header">Trier par</h3>
+        <div id="ordre-body" class="card-body">
+          <form id="ordre-form" action="api.php" method="GET" class="d-flex justify-content-center align-items-center">
+            <div>
+              <h5>📅</h5>
+              <button type="submit" value="created-at-asc" class="btn-order">▲</button> 
+              <button type="submit" value="created-at-desc" class="btn-order">▼</button> 
+            </div>
+            <div>
+              <h5>🎯</h5>
+              <button type="submit" value="target-date-asc" class="btn-order">▲</button> 
+              <button type="submit" value="target-date-desc" class="btn-order">▼</button> 
+            </div>
+            <div>
+              <h5>🔔</h5>
+              <button type="submit" value="priority-asc" class="btn-order">▲</button> 
+              <button type="submit" value="priority-desc" class="btn-order">▼</button> 
+            </div>
+         </form>
         </div>
       </div>
       <div id="filtre" class="card border-light mb-3 text-center">
@@ -119,6 +121,29 @@
           </div>
         </div>
       </div>
+      <div id="pagination" class="card border-light mb-3 text-center">
+        <h3 id="pagination-title" class="card-header">Pages & Notes</h3>
+        <div id="pagination-body" class="card-body d-flex justify-content-center align-items-center">
+          <div id="per-page">
+            <h5>Notes par page</h5>
+            <select id="per-page" class="badge-pill">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="" selected>toutes</option>
+            </select>
+          </div>
+          <div id="page">
+            <h5>Page</h5>
+            <select id="state-select" class="badge-pill">
+              <option value="en cours">En cours</option>
+              <option value="terminée">Terminées</option>
+              <option value="" selected>Toutes</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="overlay">
       <div id="popup">
@@ -136,7 +161,7 @@
       </div>
       </div>
     <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
-    <div id="liste-notes">
+    <div id="liste-notes" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
       <!-- Les notes seront injectées ici par PHP ou par JavaScript -->
       <p class="chargement">Chargement des notes...</p>
 
