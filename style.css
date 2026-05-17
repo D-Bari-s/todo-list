@@ -90,6 +90,20 @@ textarea {
     transition: 0.5s ease;
 }
 
+.btn-order
+{
+    background-color: white;
+    color: black;
+    padding: 5px;
+    border: none;
+    transition: 0.5 ease;
+}
+
+.btn-order:hover{
+    color: blue;
+    transition: 0.5 ease;
+}
+
 .form-btn:hover {
     background-color: rgb(61, 7, 189);
     transition: 0.5s ease;
@@ -231,3 +245,22 @@ textarea {
     max-height: 70%;
 }
 
+#filtre, #ordre
+{
+    margin-top: 10px;
+    max-width:18rem;
+    justify-self: center;
+}
+
+#filtre-body, #ordre-body
+{
+    gap: 10px;
+}
+
+#ordre-filtre{
+    justify-self: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 30px;
+}

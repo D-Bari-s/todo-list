@@ -288,22 +288,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 //Si le php est appelé depuis la fonction d'affichage des notes :
 if ($_SERVER['REQUEST_METHOD'] === 'GET')
 {
-    $user_id = $_SESSION['user_id'] ?? '';
-
-    if ($user_id == '')
+    try
     {
-        echo json_encode(['status' => 'error', 'response' => 'Aucun utilisateur']);
+        //On récupère les paramètres passés par le JS :
+        $user_id = $_SESSION['user_id'] ?? '';
+        $state = $_GET['state'] ?? '';
+        $priority = $_GET['priority'] ?? '';
+        //Par défaut page 1 avec 100 notes affichées :
+        //On cast pour 2 raisons :
+        // - Calcul pas possible si string & int
+        // - MYSQL n'accepte que des int pour LIMIT & OFFSET : il faut les cast
+        $page = (int)($_GET['page'] ?? 1);
+        $per_page = (int)($_GET['per_page'] ?? 100);
+        //Si page == 0 -> pas d'offset :
+        $offset = ($page - 1) * $per_page;
+        if ($user_id == '')
+        {
+            echo json_encode(['status' => 'error', 'response' => 'Aucun utilisateur']);
+            exit;
+        }
+        
+        //On construit la requête de base :
+        $string_notes = "SELECT * FROM tasks WHERE user_id = :id";
+        $params = [];
+        $params['id'] = $user_id;
+        
+        //Si un filtre est appliqué, on doit étendre le WHERE :
+        if ($state != '') 
+        {
+            $string_notes .= " AND state = :state";
+            $params['state'] = $state;
+        }
+        //Deux if séparés pour prendre en compte les deux filtres :
+        if ($priority != '')
+        {
+            $string_notes .= " AND priority = :priority";
+            $params['priority'] = $priority;
+        }
+
+        //On n'ajoute qu'à la fin le LIMIT & OFFSET :
+        //On peut se permettre de faire de l'interpolation car les paramètres ont été cast explicitement en int :
+        //Pas de risque d'injection
+        $string_notes.=" LIMIT $per_page OFFSET $offset";
+
+        //Préparation de la requête :
+        $sth = $connection->prepare($string_notes);
+        $sth->execute($params);
+        //On récupère un tableau associatif :
+        $notes = $sth->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['status' => 'success', 'response' => $notes]);
+        exit;
+    }
+    catch (PDOException $ex)
+    {
+        echo json_encode(['status' => 'error' , 'response' => $ex->getMessage()]);
         exit;
     }
     
-    $string_notes = "SELECT * FROM tasks WHERE user_id = :id";
-
-    $sth = $connection->prepare($string_notes);
-    $sth->execute([':id' => $user_id]);
-    //On récupère un tableau associatif :
-    $notes = $sth->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($notes);
-    exit;
 
     
     

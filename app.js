@@ -7,6 +7,9 @@ const liste_notes = document.getElementById('liste-notes');
 const popup = document.getElementById('popup');
 const overlay = document.querySelector('#overlay');
 const disconnect_btn = document.querySelector('#disconnect-btn');
+
+const priority_select = document.querySelector('#priority-select');
+const state_select = document.querySelector('#state-select');
 // On récupère le titre de la page pour décider de quelle fonction s'exécute :
 const titre_page = document.title;
 
@@ -19,15 +22,43 @@ const notes_hautes = null;
 
 
 //----------------- Afficher les cartes & catégories construites : -----------------
-async function afficherNotes()
+async function afficherNotes(page = null, per_page = null, order = null, order_by = null)
 {
     try
     {
+        //On vide le contenu HTML avant d'insérer :
         liste_notes.innerHTML = '';
-        //On appelle le PHP, GET par défaut :
-        const response = await fetch('api.php', {method: 'GET'});
-        const notes = await response.json();
+        //On récupère les paramètres au besoin, permet d'avoir une seule fonction si les filtres sont appelés :
+        let params = [];
+        const state = state_select.value;
+        const priority = priority_select.value;
 
+        if (state != '')
+        {  
+            params.push(`state=${state}`);
+        }
+        //2 if séparés pour prendre en compte les deux filtres :
+        if (priority != '')
+        {
+            params.push(`priority=${priority}`);
+        }
+
+        if (page != null) params.push(`page=${page}`);
+        if (per_page != null) params.push(`per_page=${per_page}`);
+
+        const string_fetch = 'api.php?'+params.join('&');
+        console.log(string_fetch);
+        //On appelle le PHP, GET par défaut :
+        const response = await fetch(
+            string_fetch, 
+            {method: 'GET'}
+        );
+        const resultat = await response.json();
+        const notes = resultat.response;
+        if (resultat.status == 'error')
+        {
+            afficherMessage(resultat.response,'text-danger');
+        }
         //Si aucune note, afficher message :
         if (notes.length == 0)
         {
@@ -55,10 +86,12 @@ async function afficherNotes()
 
 
 //----------------- Afficher les catégories : -----------------
-function afficherCategories(filtre = "priorite")
+function afficherCategories(filter = 'none', value = 'none')
 {
     //Créer les catégories, permet d'ajouter simplement une categorie si nécessaire
     //en gardant le scope global :
+    document.querySelector('#liste-notes').innerHTML = '';
+
     const priorites = ['basse','moyenne','haute'];
     $index = 0;
     const categories = [notes_basses,notes_moyennes,notes_hautes];
@@ -493,16 +526,15 @@ if (titre_page == 'Liste des notes')
             //On récupère la priorité de la note (basse, moyenne ou haute) :
             const new_card_priority= new_card.querySelector('#note-priority');
             //On veut seulement garder le titre de la catégorie :
-            const priority_title = new_card_priority.textContent.replace('Priorité : ','');
+            const priority_title = new_card_priority.textContent.replace('🔔 ','');
 
             //On récupère la catégorie portant le même nom :
-            const new_card_categorie = document.getElementById(priority_title);
-            /*
-                insertBefore(nouvelleCarte, listeNotes.firstChild)
-                → insère avant le premier enfant (= en haut de la liste)
-                
-                Si la liste est vide, firstChild = null → appendChild
-            */
+            var new_card_categorie = document.getElementById(priority_title);
+            if (new_card_categorie == null)
+            {
+                afficherCategories();
+                new_card_categorie = document.getElementById(priority_title);
+            }
             if (new_card_categorie.firstChild && new_card_categorie.firstChild.tagName !== 'P') 
             {
                 //Insérer avant le premier élément & après le titre :
@@ -519,6 +551,16 @@ if (titre_page == 'Liste des notes')
         }
         
     });
+
+    //------------ eventListener sur les <select> de filtre ------------
+
+    //On appelle afficherNotes en lui passant les paramètres choisis :
+    const priority_select = document.querySelector('#priority-select');
+    priority_select.addEventListener('change', () => afficherNotes());
+
+    //On appelle afficherNotes en lui passant les paramètres choisis :
+    const state_select = document.querySelector('#state-select');
+    state_select.addEventListener('change', () => afficherNotes());
 }
 
 //----------------- Formater date & heure : -----------------
