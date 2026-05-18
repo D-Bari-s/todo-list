@@ -204,6 +204,7 @@ textarea {
 #liste-notes{
     margin: 0 auto;
 }
+
 #popup{
     /* La largeur dépend du contenu */
     max-width: fit-content;

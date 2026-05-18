@@ -382,6 +382,7 @@ async function supprimerNote(id, card)
         {
             //On enlève la card du DOM, pas besoin de raffraîchir :
             card.remove();
+            afficherNotes();
             afficherMessage('Note supprimée !');
         }
         else
@@ -492,27 +493,17 @@ if (titre_page == 'Liste des notes')
             const response_card = resultat.response;
             const new_card = creerCarte(response_card);
 
-            //On récupère la priorité de la note (basse, moyenne ou haute) :
-            const new_card_priority= new_card.querySelector('#note-priority');
-            //On veut seulement garder le titre de la catégorie :
-            const priority_title = new_card_priority.textContent.replace('🔔 ','');
 
-            //On récupère la catégorie portant le même nom :
-            var new_card_categorie = document.getElementById(priority_title);
-            if (new_card_categorie == null)
+            if (liste_notes.firstChild && liste_notes.firstChild.tagName !== 'P') 
             {
-                afficherCategories();
-                new_card_categorie = document.getElementById(priority_title);
-            }
-            if (new_card_categorie.firstChild && new_card_categorie.firstChild.tagName !== 'P') 
-            {
-                //Insérer avant le premier élément & après le titre :
-                new_card_categorie.insertBefore(new_card, new_card_categorie.children[1]);
+                //Insérer avant le premier élément :
+                liste_notes.insertBefore(new_card, liste_notes.children[0]);
             } 
             else 
             {
-                new_card_categorie.appendChild(nouvelleCarte);
+                liste_notes.appendChild(new_card);
             }
+            afficherNotes();
         }
         catch (e)
         {
@@ -536,6 +527,8 @@ if (titre_page == 'Liste des notes')
     ordre_form.addEventListener('submit', function(evenement){
         evenement.preventDefault();
         const donnees = new FormData(ordre_form);
+
+
         console.log(donnees);
     });
 }
