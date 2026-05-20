@@ -1,265 +1,326 @@
-
-.nav-btn
-{
-
-    background-color: rgba(0,0,0,0.0);
-    border: none;
-}
+/* ============================================================
+   BASE
+   ============================================================ */
 
 h1 {
-    text-align: center;
-}
-h2{
-    font-family:'Segoe UI';
-    font-weight: lighter;
+  text-align: center;
 }
 
-#message{
-    align-self: center;
-    margin: 20px auto;
-    text-align: center;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    max-width: 300px;
-    animation: glisser 0.5s ease-in-out;
-    font-size: 20px;
-}
-
-
-form {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    border-radius:10px;
-    animation: glisser 0.5s ease-out;
-}
-
-@keyframes glisser {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card{
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    /* Ajoute une animation */
-    animation: glisser 0.5s ease-out;
-    border-radius: 15px;
-}
-
-
-
-#connect-form, #inscription-form{
-    margin-top: 50px;
-    text-align:center;
-    max-width: 400px;
-    max-height: 700px;
-    /* ALigner le formulaire au centre de la page */
-
+h2,h3 {
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 300;
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
 input,
 textarea {
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-/* Pour les boutons d'envoi & de connexion dans l'UI */
-.form-btn {
-    background-color:rgb(80, 8, 248);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.5s ease;
+/* ============================================================
+   ANIMATION
+   ============================================================ */
+
+@keyframes glisser {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.btn-order
-{
-    background-color: white;
-    color: black;
-    padding: 5px;
-    border: none;
-    transition: 0.5 ease;
-    border-radius: 50px;
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+
+.nav-btn {
+  background: transparent;
+  border: none;
 }
 
-.btn-order:hover{
-    color: blue;
-    background-color: rgba(0, 0, 0, 0.1);
-    transition: 0.5s ease;
+/* ============================================================
+   MISE EN PAGE PRINCIPALE
+   ============================================================ */
+
+#global-overlay {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  padding: 0 20px 30px;
+  align-items: start;
+  /* Position fixe malgré le scroll */
+  
 }
 
-.form-btn:hover {
-    background-color: rgb(61, 7, 189);
-    transition: 0.5s ease;
-}
+/* Sidebar gauche : formulaire + filtres + tri + pagination */
+#overlay-filtres-formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: fixed;
+  top: 70px; 
+  left: 0;
+  width: 320px;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
 
-
-/* Pour les logos liées aux actions CRUD */
-.logo-crud{
-    border: none;
-    cursor: pointer;
-    font-size: 25px;
-    padding: 0px;
-    background-color: rgba(0, 0, 0, 0.0);
-    border-radius: 20px;
-    transition: 0.3s ease;
-    text-decoration: none;
-}
-
-.logo-crud:hover{
-    transition: 0.3s ease;
-    text-decoration: none;
-    font-size:26px;
 }
 
 
-/* Style pour la classe champ */
-.champ {
-    margin-bottom: 20px;
+#overlay-filtres-formulaire > * {
+  animation: glisser 0.5s ease-out;
 }
 
-/* Style pour le message de confirmation */
-.confirmation {
-    text-align: center;
-    margin-top: 20px;
+/* Zone des notes à droite */
+#liste-notes {
+  padding-left: 340px;
+  width: calc(100% + 1000px);
+  max-width: 1920px;
 }
 
-.confirmation p {
-    font-weight: bold;
+/* ============================================================
+   FORMULAIRE D'AJOUT
+   ============================================================ */
+
+form {
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
 }
 
-
-#basse,#moyenne,#haute
-{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* background-color: #f0eeee61; */
-    border-radius: 10px;
-    align-items: center;
-    min-height:200px;
-    margin-top: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-
+form>* {
+  animation: glisser 0.5s ease-out;
 }
 
-#basse>h2,#moyenne>h2,#haute>h2{
-    font-family:'Segoe UI';
-    font-weight: lighter;
-}
-
-.message{
-    margin: auto;
-    animation: glisser 0.5s ease-out;
-}
-/* Style pour la balise de classe list-box (select & options), style similaire à champ */
-.list-box{
-    margin-bottom: 20px;
+.champ,
+.list-box {
+  margin-bottom: 20px;
 }
 
 #priority {
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    padding: 5px;
-    font-size: 20px;
-    width: 90%;
-    
+  width: 90%;
+  padding: 5px;
+  font-size: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-#overlay{
-  position: fixed;         /* couvre tout l'écran */
-  inset: 0;               /* top/right/bottom/left: 0 */
-  background: rgba(0,0,0,0.45);
-  overflow-y: auto;      /* scroll si contenu trop grand */
+/* ============================================================
+   BOUTONS
+   ============================================================ */
+
+.form-btn {
+  background-color: rgb(80, 8, 248);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-btn:hover {
+  background-color: rgb(61, 7, 189);
+}
+
+.btn-order {
+  background-color: white;
+  color: black;
+  padding: 5px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.btn-order:hover {
+  color: blue;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.logo-crud {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  border-radius: 15px;
+  color: white;
+  transition: font-size 0.3s ease;
+  padding: 5px;
+}
+
+.logo-crud:first-of-type{
+  margin-right: 10px;
+}
+
+.logo-crud:last-of-type{
+  margin-left: 10px;
+}
+
+
+.delete-note {
+  background-color: #fee2e2;
+  color: #991b1b;
+  transition: 0.2s ease;
+}
+.delete-note:hover {
+  background-color: #fca5a5;
+  transition: 0.2s ease;
+}
+
+.modify-note {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  transition: 0.2s ease;
+}
+.modify-note:hover {
+  background-color: #c7d2fe;
+  transition: 0.2s ease;
+}
+
+.fulfill-note {
+  background-color: #d1fae5;
+  color: #065f46;
+  transition: 0.2s ease;
+}
+.fulfill-note:hover {
+  background-color: #a7f3d0;
+  transition: 0.2s ease;
+}
+
+/* ============================================================
+   CARTES DE NOTES
+   ============================================================ */
+
+.note-card {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  animation: glisser 0.5s ease-out;
+  max-width: 70rem;
+  border: none;
+  margin-bottom: 10px;
+  padding: 5px;
+  transition: 0.2s ease;
+}
+
+.note-card:hover{
+  /* grandir la div */
+  transform: scale(1.02);
+  transition: 0.2s ease;
+}
+
+.badge{
+  font-size: 15px;
+}
+
+/* ============================================================
+   TRI / FILTRE / PAGINATION
+   ============================================================ */
+
+#ordre,
+#filtre,
+#pagination {
+  margin-top: 0;
+  width: 100%;
+  max-width: none;
+}
+
+#ordre-form,
+#filtre-body {
   display: flex;
-  align-items: flex-start; /* pas center ! */
+  justify-content: space-around;
+  align-items: center;
+  gap: 16px;
+  box-shadow: none;
+}
+
+/* ============================================================
+   POPUP DE MODIFICATION
+   ============================================================ */
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem 1rem;    /* marge autour de la popup */
+  padding: 2rem 1rem;
+  overflow-y: auto;
   box-sizing: border-box;
   opacity: 0;
-  pointer-events:none;
+  pointer-events: none;
   z-index: 0;
-  transition: 0.5 ease;
+  transition: opacity 0.3s ease;
 }
 
-#liste-notes{
-    margin: 0 auto;
+#overlay.open {
+  opacity: 1;
+  pointer-events: all;
+  z-index: 9999;
 }
 
-#popup{
-    /* La largeur dépend du contenu */
-    max-width: fit-content;
-    box-sizing: border-box;
-    background-color: #f1f0f0;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    margin: auto;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+#popup {
+  background-color: #f1f0f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: fit-content;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  animation: glisser 0.3s ease-out;
 }
 
-#overlay.open{
-    opacity: 1;
-    transition: 0.5s ease;
-    /* Position au-dessus de tous les éléments */
-    pointer-events: all;
-    z-index: 9999;
+#popup-body {
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
-#popup-body{
-    display: flex;
-    gap: 20px;
-    align-items: center;
+/* ============================================================
+   MESSAGE FEEDBACK
+   ============================================================ */
+
+#message {
+  align-self: center;
+  margin: 20px auto;
+  text-align: center;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  font-size: 20px;
+  animation: glisser 0.5s ease-in-out;
 }
 
-#cloned-formulaire, #cloned-note{
-    padding: auto;
-    margin: auto;
-    max-width: 30%;
-    max-height: 70%;
+/* ============================================================
+   FORMULAIRES CONNEXION / INSCRIPTION
+   ============================================================ */
+
+#connect-form,
+#inscription-form {
+  margin: 20px auto;
+  text-align: center;
+  max-width: 400px;
 }
 
-#filtre, #ordre
-{
-    margin-top: 10px;
-    max-width:18rem;
-    justify-self: center;
-}
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 
-#filtre-body, #ordre-form
-{
-    gap: 20px;
-}
+@media (max-width: 768px) {
+  #global-overlay {
+    grid-template-columns: 1fr;
+    padding: 0 12px 20px;
+  }
 
-#ordre-filtre{
-    justify-self: center;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 30px;
 }

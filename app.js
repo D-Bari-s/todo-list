@@ -67,14 +67,18 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
         }
 
         //Sinon, créer les notes :
+        let is_first = true;
         notes.forEach($note =>{
             //Créer la carte :
             const current_note = creerCarte($note);
             //Gérer l'affichage des cards avec Bootstrap :
-            const col = document.createElement('div');
-            col.classList.add('col');
-            col.appendChild(current_note);
-            liste_notes.appendChild(col);
+            if (is_first)
+            {
+                liste_notes.appendChild(current_note);
+                is_first = false;
+            }
+            else liste_notes.insertBefore(current_note, liste_notes.children[0]);
+            last_note = current_note;
         });
         
     }
@@ -92,39 +96,40 @@ function creerCarte(note)
         //Création de la carte, en reprenant les classes bootstrap (évite de faire 50 lignes de CSS)
         //------------ Carte : ------------
         const note_card = document.createElement('div');
-        note_card.className = 'card border-light mb-3';
-        note_card.style='max-width: 20rem;';
+        note_card.className = 'note-card';
+        
         //On récupère l'id de la tâche pour la suppression (sans l'afficher) :
         note_card.dataset.id = note.id_task;
         const is_finished = note.state == 'terminée';
 
         //------------ Header de la note : ------------
-        const note_header = document.createElement('div');
-        note_header.classList.add('card-header');
+            // const note_header = document.createElement('div');
+            // note_header.classList.add('card-header');
         //Titre du header :
-        const note_header_title = document.createElement('h5');
-        note_header_title.classList.add('note-title','mb-0');
-        note_header_title.textContent = note.title;
+        const note_title = document.createElement('h5');
+        note_title.classList.add('note-title');
+        note_title.textContent = note.title;
+
         //Date de création du header :
         const note_created_at = document.createElement('span');
         note_created_at.classList.add('note-created-at','mb-0');
         note_created_at.textContent = `📅 Créée le ${formatDateTime(note.created_at)}`;
         //Append le header :
-        note_header.appendChild(note_header_title);
-        note_header.appendChild(note_created_at);
+            // note_header.appendChild(note_header_title);
+            // note_header.appendChild(note_created_at);
 
         //------------ Body de la carte : ------------
-        const note_body = document.createElement('div');
-        note_body.className = 'card-body';
+            // const note_body = document.createElement('div');
+            // note_body.className = 'card-body';
         //Description de la note :
         const note_description = document.createElement('p');
         note_description.classList.add('note-description','mb-0');
         note_description.textContent = note.description;
-        note_body.appendChild(note_description);
+            // note_body.appendChild(note_description);
 
         //------------ 1er footer de la carte : ------------
-        const note_footer_1 = document.createElement('div');
-        note_footer_1.classList.add('card-footer','d-flex','justify-content-between','align-items-center','flex-wrap','gap-2');
+        const note_infos = document.createElement('div');
+        note_infos.classList.add('infos-card','d-flex','justify-content-between','align-items-center','flex-wrap','gap-2');
 
         //Priorité de la note :
         const note_priority = document.createElement('span');
@@ -137,7 +142,7 @@ function creerCarte(note)
         note_state.classList.add('note-state', 'badge' , 'rounded-pill');
         if (is_finished) note_state.classList.add('badge-success');
         note_state.textContent = '✏️ '+note.state[0].toUpperCase()+note.state.slice(1);
-        note_card.style.backgroundColor = is_finished ? 'rgba(80, 173, 108, 0.2)' : 'white';
+        note_card.style = is_finished ? 'border-left: 8px solid green' : 'border-left: 8px solid rgb(219, 216, 18)';
         
         //Date de rendue :
         const note_target_date = document.createElement('small');
@@ -151,30 +156,30 @@ function creerCarte(note)
             const is_late = new Date(note.target_date) < Date.now();
             //Si la note est en retard, en évidence :
             if(is_late) note_target_date.classList.add('badge-danger');
-            note_card.style.backgroundColor = is_late ? 'rgba(248, 8, 8, 0.2)' : 'white';
+            note_card.style = is_late ? 'border-left: 8px solid red' : 'border-left: 8px solid rgb(219, 216, 18)';
         }
 
         //Append le footer 1 : 
-        note_footer_1.appendChild(note_priority);
-        note_footer_1.appendChild(note_state);
-        note_footer_1.appendChild(note_target_date);
+        note_infos.appendChild(note_priority);
+        note_infos.appendChild(note_state);
+        note_infos.appendChild(note_target_date);
 
         //Ajout de la date de rendue au dataset pour l'ajouter dans le popup:
         note_card.dataset.target_date = note.target_date;
 
         //------------ 2eme footer de la carte : ------------
-        const note_footer_2 = document.createElement('div');
-        note_footer_2.classList.add('card-footer','d-flex','gap-10');
+        const note_actions = document.createElement('div');
+        note_actions.classList.add('actions-card','d-flex','gap-10');
 
         //---- Actions sur la carte (CRUD): ----
         //Supprimer la note :
         const delete_note = document.createElement('button');
         delete_note.classList.add('logo-crud','delete-note');
-        delete_note.textContent = '🗑️';
+        delete_note.textContent = 'Supprimer';
         //EventListener : au clic du bouton on déclenche la fonction supprimerNote
         //en lui passant l'id de la note & la carte :
         delete_note.addEventListener('click', ()=>supprimerNote(note.id_task, note_card));
-        note_footer_2.appendChild(delete_note);
+        note_actions.appendChild(delete_note);
  
         //On ajoute les boutons à la fin de la card uniquement si la tâche n'est pas terminée :
         if (!is_finished)
@@ -182,25 +187,23 @@ function creerCarte(note)
             //EventListener : ouvrir un popoup pour modifier la note
             const modify_note = document.createElement('button');
             modify_note.classList.add('logo-crud','modify-note');
-            modify_note.textContent = '📝';
+            modify_note.textContent = 'Modifier';
             modify_note.addEventListener('click', () => ouvrirPopup(note.id_task));
-            note_footer_2.appendChild(modify_note);
+            note_actions.appendChild(modify_note);
 
             //Bouton pour marquer la tâche commme terminée :
             //Ce bouton doit désactiver les modifs de la tâche et la rendre verte
             const fulfill_note = document.createElement('button');
             fulfill_note.classList.add('logo-crud','fulfill-note');
-            fulfill_note.textContent = '✔️';
+            fulfill_note.textContent = 'Terminer';
             fulfill_note.addEventListener('click', () => terminerNote(note.id_task, note_card));
-            note_footer_2.appendChild(fulfill_note);
+            note_actions.appendChild(fulfill_note);
         }
 
 
         //On ajoute le header & le body à la carte :
-        note_card.appendChild(note_header);
-        note_card.appendChild(note_body);
-        note_card.appendChild(note_footer_1);
-        note_card.appendChild(note_footer_2);
+        const elements = [note_title, note_description, note_infos, note_actions];
+        elements.forEach(element => note_card.appendChild(element));
         return note_card;
     }
     catch(erreur)
@@ -258,7 +261,7 @@ function construirePopup()
             const donnees = new FormData(cloned_formulaire);
             console.log(donnees['target_date']);
             //On récupère l'id de la carte pour savoir laquelle modifier :
-            const card = popup.querySelector('.card');
+            const card = popup.querySelector('.note-card');
             const id_card = card.dataset.id;
             
             //On l'ajoute au body :
@@ -278,6 +281,7 @@ function construirePopup()
 
             button.disabled = false;
             button.textContent ='Modifier la note';
+            cloned_formulaire.reset();
             fermerPopup();
             afficherNotes();
             console.log(response.response);
@@ -299,7 +303,7 @@ function ouvrirPopup(note_id)
     overlay.classList.add('open');
 
     //On récupère l'élément possédant la classe card et dont l'id correspond à l'id de la note à modifier
-    const note_to_modify = liste_notes.querySelector(`.card[data-id="${note_id}"]`);
+    const note_to_modify = liste_notes.querySelector(`.note-card[data-id="${note_id}"]`);
     //On la clone :
     const cloned_note = note_to_modify.cloneNode(true);
     cloned_note.id = 'cloned-note';
@@ -312,8 +316,20 @@ function ouvrirPopup(note_id)
     popup_actuel.appendChild(cloned_note);
 
     //Modification des champs par defaut, pour que ça match avec ceux de la note :
+
+    //Date & Priorité
     const champ_date = popup.querySelector('#target_date');
     const champ_priority = popup.querySelector('#priority');
+
+    //On récupère le champ du titre
+    const champ_title = popup.querySelector('#title');
+    //on le modifie avec le titre de la note en cours: 
+    champ_title.value = popup.querySelector('.note-title').textContent;
+
+    //On récupère le champ de description: 
+    const champ_description = popup.querySelector('#description');
+    //on le modifie avec la description de la note en cours :
+    champ_description.textContent = popup.querySelector('.note-description').textContent;
 
     //On récupère la data dans le dataset de la carte & on l'assigne :
     const default_date = cloned_note.dataset.target_date;
@@ -334,7 +350,7 @@ function fermerPopup()
     overlay.classList.remove('open');
     popup.classList.remove('open');
     //On retire la note du popup en la retirant du popup :
-    popup.querySelector('.card').remove();
+    popup.querySelector('.note-card').remove();
 }
 
 //----------------- Afficher un message dans la div 'message' : -----------------
@@ -524,12 +540,22 @@ if (titre_page == 'Liste des notes')
 
     //------------ eventListener sur le formulaire de tri ------------
     const ordre_form = document.querySelector('#ordre-form');
-    ordre_form.addEventListener('submit', function(evenement){
-        evenement.preventDefault();
-        const donnees = new FormData(ordre_form);
-
-
-        console.log(donnees);
+    ordre_form.addEventListener('submit', async function(evenement){
+        try
+        {
+            evenement.preventDefault();
+            const order = evenement.submitter.value;
+            const donnees = new FormData(ordre_form);
+            donnees.append('order',order);
+            const resultat = await fetch('api.php',{
+                method: 'POST',
+                body: donnees
+            });
+        }
+        catch (ex)
+        {
+            afficherMessage(ex,'text-danger');
+        }
     });
 }
 
@@ -611,7 +637,7 @@ async function verifConnection()
             document.location.href='connexion.php';
         }
 
-        document.querySelector('#message-accueil').textContent = '📝 Liste des notes de '+resultat.response.username;
+        document.querySelector('#message-accueil').textContent += ' de '+resultat.response.username;
     }
     catch (e)
     {
@@ -645,6 +671,7 @@ else if (titre_page == 'Connexion')
                 method: 'POST',
                 body: donnees
             });
+            console.log(response);
             resultat = await response.json();
             if(resultat.status == 'success' && resultat.response == 'Password match')
             {

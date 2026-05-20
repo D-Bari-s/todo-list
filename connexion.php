@@ -1,17 +1,3 @@
-<?php
-require_once "config.php";
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    $email = $_POST['email'] ?? '';
-    $pwd = $_POST['pwd'] ?? '';
-}
-
-$string = "SELECT * FROM users WHERE email=:email";
-
-
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>

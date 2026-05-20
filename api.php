@@ -110,13 +110,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 echo json_encode(['status' => 'success', 'response' => 'Password match']);
                 exit;
             }
+            else
+            {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'response' => 'Mail ou mot de passe incorrect']);
+            }
         
         }
         catch (PDOException $ex)
         {
             //Internal error :
             http_response_code(500);
-            echo json_encode($ex->getMessage());
+            echo json_encode(['status'=>'error','response'=>$ex->getMessage()]);
             exit;
         }
     }
