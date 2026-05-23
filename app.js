@@ -10,6 +10,7 @@ const disconnect_btn = document.querySelector('#disconnect-btn');
 
 const priority_select = document.querySelector('#priority-select');
 const state_select = document.querySelector('#state-select');
+const per_page = document.querySelector('#per_page');
 // On récupère le titre de la page pour décider de quelle fonction s'exécute :
 const titre_page = document.title;
 
@@ -18,11 +19,13 @@ const notes_basses = null;
 const notes_moyennes = null;
 const notes_hautes = null;
 
+//Page :
+const page = 0;
 // ---------------------- Définition des fonctions : -------------------------------------------------
 
 
 //----------------- Afficher les cartes & catégories construites : -----------------
-async function afficherNotes(page = null, per_page = null, order = null, order_by = null)
+async function afficherNotes(order = null, direction = null)
 {
     try
     {
@@ -32,6 +35,7 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
         let params = [];
         const state = state_select.value;
         const priority = priority_select.value;
+        const per_page = per_page.value;
 
         if (state != '')
         {  
@@ -45,6 +49,8 @@ async function afficherNotes(page = null, per_page = null, order = null, order_b
 
         if (page != null) params.push(`page=${page}`);
         if (per_page != null) params.push(`per_page=${per_page}`);
+        if (order != null) params.push(`order=${order}`);
+        if (direction != null) params.push(`direction=${direction}`);
 
         const string_fetch = 'api.php?'+params.join('&');
         
@@ -544,13 +550,15 @@ if (titre_page == 'Liste des notes')
         try
         {
             evenement.preventDefault();
-            const order = evenement.submitter.value;
+            const value = evenement.submitter.value;
+            //colonne dans order[0] & ordre dans order[1]
+            const order_form = value.split(" ");
             const donnees = new FormData(ordre_form);
-            donnees.append('order',order);
-            const resultat = await fetch('api.php',{
-                method: 'POST',
-                body: donnees
-            });
+            //On ajoute les valeurs à donnees
+            donnees.append('order',order_form[0]);
+            donnees.append('direction',order_form[1]);
+            //On appelle afficherNotes avec les paramètres récupérés
+            afficherNotes(order_form[0],order_form[1]);
         }
         catch (ex)
         {

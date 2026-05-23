@@ -336,14 +336,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
         }
         $state = $_GET['state'] ?? '';
         $priority = $_GET['priority'] ?? '';
+        $order = $_GET['order'];
+        $direcion = $_GET['direction'];
         //Par défaut page 1 avec 100 notes affichées :
         //On cast pour 2 raisons :
         // - Calcul pas possible si string & int
         // - MYSQL n'accepte que des int pour LIMIT & OFFSET : il faut les cast
-        $page = (int)($_GET['page'] ?? 1);
-        $per_page = (int)($_GET['per_page'] ?? 100);
-        //Si page == 0 -> pas d'offset :
-        $offset = ($page - 1) * $per_page;
+        $page = (int)($_GET['page'] ?? '');
+        $per_page = (int)($_GET['per_page'] ?? '');
+        
         
         
         //On construit la requête de base :
@@ -363,11 +364,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
             $string_notes .= " AND priority = :priority";
             $params['priority'] = $priority;
         }
-
+        //Comme on ne peut passer un nom de colonne dans les paramètres nommés, il faut créer un filtre :
+        $order_filter=['target_date','created_at','priority'];
+        $direction_filter=['ASC','DESC'];
+        //Ensuite on met le ORDER BY en vérifiant que le order & direction sont des valeurs valides :
+        if(in_array($order,$order_filter) && in_array($direction,$direction_filter))
+        {
+            $string_notes .= " ORDER BY $order $direction";
+        }
         //On n'ajoute qu'à la fin le LIMIT & OFFSET :
-        //On peut se permettre de faire de l'interpolation car les paramètres ont été cast explicitement en int :
-        //Pas de risque d'injection
-        $string_notes.=" LIMIT $per_page OFFSET $offset";
+        
+        if($page != '' && $per_page != '')
+        {
+
+            //Si page == 0 -> pas d'offset :
+            $offset = ($page - 1) * $per_page;
+            //On peut se permettre de faire de l'interpolation car les paramètres ont été cast explicitement en int :
+            //Pas de risque d'injection
+            $string_notes.=" LIMIT $per_page OFFSET $offset";
+        }
+        
 
         //Préparation de la requête :
         $sth = $connection->prepare($string_notes);
@@ -380,7 +396,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
     catch (PDOException $ex)
     {
         http_response_code(500);
-        echo json_encode(['status' => 'error' , 'response' => $ex->getMessage()]);
+        echo
+         json_encode(['status' => 'error' , 'response' => $ex->getMessage()]);
         exit;
     }
     
