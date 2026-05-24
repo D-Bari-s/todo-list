@@ -37,6 +37,12 @@ $user = 'root'
 ### 4. Accéder au site servi par Apache :
 Dans le navigateur, accéder à `http://localhost/todo-list/`
 
+### 5. Identifiants de test :
+Les notes créées avec database.sql correspondent à ces utilisateurs :
+`email : alice@mail.com password : 123`
+`email : bob@mail.com password : 456`
+`email : charlie@mail.com password : 789`
+
 ## Le cycle complet d'une requête
 
 ```
