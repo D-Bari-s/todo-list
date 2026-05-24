@@ -21,67 +21,148 @@
           <div class="navbar-nav">
             <a class="nav-link active" aria-current="page" href="index.html">Notes</a>
             <a class="nav-link" aria-current="page" href="connexion.php">Connexion</a>
-            <a class="nav-link" href="#">Déconnexion - A changer pour gérer via PHP</a>
+            <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion</a>
           </div>
         </div>
       </div>
     </nav>
     
-    <h1>📝 Liste des notes</h1>
-
-    <!-- Formulaire pour ajouter une note : -->
-    <form id="form-note" action="api.php" method="POST">
-
-      <!-- input hidden : l'utilisateur ne le voit pas,
-            mais il indique à PHP quelle action effectuer -->
-      <input type="hidden" name="action" value="create-note">
-      <!-- Titre de la note : -->
-      <div class="champ">
-        <label for="titre">Titre</label>
-        <input type="text" id="title" name="title" placeholder="Ex : Ma première note" required>
-      </div>
-      <!-- Contenu de la note : -->
-      <div class="champ">
-        <label for="description">Contenu</label>
-        <textarea
-          id="description"
-          name="description"
-          rows="4"
-          placeholder="Écris ta note ici..."
-          required
-        ></textarea>
-      </div>
-      <div class="date">
-        <label for="target_date">Date de rendue</label>
-        <input
-          type="date"
-          id="target_date"
-          name="target_date"
-          value="2026-04-19"
-          min="2026-04-19"
-          max="2030-04-19" />
-      </div>
-      <div class="list-box">
-        <label for="priority">Priorité</label>
-        <select id="priority" name="priority">
-          <option value="basse" class="text-success">Basse</option>
-          <option value="moyenne" class="text-warning">Moyenne</option>
-          <option value="haute" class="text-danger">Haute</option>
-        </select>
-      </div>
-      <button type="submit" id="form-btn" class="form-btn">Ajouter la note</button>
-
+    <h1 id="message-accueil">📝 Liste des notes</h1>
+    <form id="page-form" action="api.php" method="GET">
+      <h5 id="current-page">Page</h5>
+      <button type="submit" value="up" class="btn-order" name="page-select">▲</button> 
+      <button type="submit" value="down" class="btn-order" name="page-select">▼</button>
     </form>
-    <!-- Message feedback : -->
-    <div id="message" class="message" style="display:none;"></div>
+    <div id="overlay-filtres-formulaire">
+      <!-- Message feedback : -->
+      <div id="message" class="message" style="display:none;"></div>
+      <!-- Formulaire pour ajouter une note : -->
+      <form id="form-note" action="api.php" method="POST">
 
-    <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
-    <div id="liste-notes">
-      <!-- Les notes seront injectées ici par PHP ou par JavaScript -->
-      <p class="chargement">Chargement des notes...</p>
+        <!-- input hidden : l'utilisateur ne le voit pas,
+              mais il indique à PHP quelle action effectuer -->
+        <input type="hidden" name="action" id="action-form" value="create-note">
+        <!-- Titre de la note : -->
+        <div class="champ">
+          <label for="title">Titre</label>
+          <input type="text" id="title" name="title" placeholder="Ex : Ma première note" required>
+        </div>
+        <!-- Contenu de la note : -->
+        <div class="champ">
+          <label for="description">Contenu</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="Écris ta note ici..."
+            required
+          ></textarea>
+        </div>
+        <div class="date">
+          <label for="target_date">Date de rendue</label>
+          <input
+            type="date"
+            id="target_date"
+            name="target_date"
+            value="2026-04-19"
+            min="2026-04-19"
+            max="2030-04-19" />
+        </div>
+        <div class="list-box">
+          <label for="priority">Priorité</label>
+          <select id="priority" name="priority">
+            <option value="basse" class="text-success">Basse</option>
+            <option value="moyenne" class="text-warning">Moyenne</option>
+            <option value="haute" class="text-danger">Haute</option>
+          </select>
+        </div>
+        <button type="submit" id="form-btn" class="form-btn">Ajouter la note</button>
 
+      </form>
+      
+      <!-- Tous les filtres présents sur la page:  -->
+    
+      <div id="ordre">
+        <h3 id="ordre-title" class="text-center card-header">Trier par</h3>
+        <div id="ordre-body" class="text-center">
+          <form id="ordre-form" action="api.php" method="GET" class="d-flex justify-content-center align-items-center">
+            <div>
+              <h5>📅</h5>
+              <button type="submit" value="created_at ASC" class="btn-order" name="ordre">▲</button> 
+              <button type="submit" value="created_at DESC" class="btn-order" name="ordre">▼</button> 
+            </div>
+            <div>
+              <h5>🎯</h5>
+              <button type="submit" value="target_date ASC" class="btn-order" name="ordre">▲</button> 
+              <button type="submit" value="target_date DESC" class="btn-order" name="ordre">▼</button> 
+            </div>
+            <div>
+              <h5>🔔</h5>
+              <button type="submit" value="priority ASC" class="btn-order" name="ordre">▲</button> 
+              <button type="submit" value="priority DESC" class="btn-order" name="ordre">▼</button> 
+            </div>
+        </form>
+        </div>
+      </div>
+      <div id="filtre" class="card border-light mb-3 text-center">
+        <h3 id="filter-title" class="card-header">Filtre</h3>
+        <div id="filtre-body" class="card-body d-flex justify-content-center align-items-center">
+          <div id="priority-filter">
+            <h5>Priorité</h5>
+            <select id="priority-select" class="badge-pill">
+              <option value="basse" class="text-success">Basse</option>
+              <option value="moyenne" class="text-warning">Moyenne</option>
+              <option value="haute" class="text-danger">Haute</option>
+              <!-- Valeur vide pour qu'aucun filtre ne soit appliqué en PHP -->
+              <option value="" selected>Toutes</option>
+            </select>
+          </div>
+          <div id="state-filter">
+            <h5>Etat</h5>
+            <select id="state-select" class="badge-pill">
+              <option value="en cours">En cours</option>
+              <option value="terminée">Terminées</option>
+              <!-- Pareil, valeur vide -->
+              <option value="" selected>Toutes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="pagination" class="card mb-3 text-center">
+        <h3 id="pagination-title" class="card-header">Notes par page</h3>
+          <div id="per-page-div">
+            <select id="per-page" class="badge-pill">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="" selected>toutes</option>
+            </select>
+          </div>
+      </div>
     </div>
+    <div id="global-overlay">
+      <!-- Partie popup -->
+      <div id="overlay">
+        <div id="popup">
+          <h3>Modifier la note</h3>
+          <div id="popup-body">
+            <div id="popup-actuel">
+            <!-- La note choisie sera injectée ici -->
 
+            </div>
+            <div id="popup-modif">
+              <!-- Les champs de modification apparaîtront ici, on copie le formulaire en changeant l'action du bouton -->
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Liste des notes qui sera rempli : Javascript -> PHP -> DB -> PHP -> JavaScript -> HTML -->
+      <div id="liste-notes">
+
+      </div>
+    </div>
     <!-- Appel du script JavaScript une fois la page chargée : -->
     <script src="app.js"></script>
   </body>

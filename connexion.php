@@ -1,17 +1,3 @@
-<?php
-require_once "config.php";
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    $email = $_POST['email'] ?? '';
-    $pwd = $_POST['pwd'] ?? '';
-}
-
-$string = "SELECT * FROM users WHERE email=:email";
-
-
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -33,25 +19,25 @@ $string = "SELECT * FROM users WHERE email=:email";
                 <div class="navbar-nav">
                     <a class="nav-link" aria-current="page" href="index.html">Notes</a>
                     <a class="nav-link active" aria-current="page" href="connexion.php">Connexion</a>
-                    <a class="nav-link" href="#">Déconnexion - A changer pour gérer via PHP</a>
+                    <button class="nav-link nav-btn" id="disconnect-btn">Déconnexion</a>
                 </div>
             </div>
         </div>
         </nav>
-
+        <div id="message" style="display:none;"></div>
         <!-- Formulaire de connexion : -->
         <h1>Connexion</h1>
-        <form id="connect-form" action="" method="POST">
+        <form id="connect-form" action="api.php" method="POST">
             <input type="hidden" name="action" value="connect">
             <div class="champ">
                 <label for="email">Adresse mail</label>
                 <input type="text" id="email" name="email" required>
                 <label for="pwd">Mot de passe</label>
-                <input type="paswword" id="pwd" name="pwd" required>
+                <input type="password" id="pwd" name="pwd" required>
                 <button type="submit" class="form-btn">Connexion</button> <br>
                 <a href="inscription.php">Créer un compte</a>
             </div>
-            <script href="app.js"></script>
         </form>
+        <script src="app.js"></script>
     </body>
 </html>
