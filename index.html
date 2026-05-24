@@ -28,7 +28,14 @@
     </nav>
     
     <h1 id="message-accueil">📝 Liste des notes</h1>
+    <form id="page-form" action="api.php" method="GET">
+      <h5 id="current-page">Page</h5>
+      <button type="submit" value="up" class="btn-order" name="page-select">▲</button> 
+      <button type="submit" value="down" class="btn-order" name="page-select">▼</button>
+    </form>
     <div id="overlay-filtres-formulaire">
+      <!-- Message feedback : -->
+      <div id="message" class="message" style="display:none;"></div>
       <!-- Formulaire pour ajouter une note : -->
       <form id="form-note" action="api.php" method="POST">
 
@@ -72,8 +79,7 @@
         <button type="submit" id="form-btn" class="form-btn">Ajouter la note</button>
 
       </form>
-      <!-- Message feedback : -->
-      <div id="message" class="message" style="display:none;"></div>
+      
       <!-- Tous les filtres présents sur la page:  -->
     
       <div id="ordre">
@@ -122,11 +128,9 @@
           </div>
         </div>
       </div>
-      <div id="pagination" class="card border-danger mb-3 text-center">
-        <h3 id="pagination-title" class="card-header text-danger">Pages & Notes</h3>
-        <div id="pagination-body" class="card-body d-flex justify-content-center align-items-center">
-          <div id="per-page">
-            <h5>Notes par page</h5>
+      <div id="pagination" class="card mb-3 text-center">
+        <h3 id="pagination-title" class="card-header">Notes par page</h3>
+          <div id="per-page-div">
             <select id="per-page" class="badge-pill">
               <option value="10">10</option>
               <option value="20">20</option>
@@ -135,15 +139,6 @@
               <option value="" selected>toutes</option>
             </select>
           </div>
-          <div id="page">
-            <h5>Page</h5>
-            <select id="state-select" class="badge-pill">
-              <option value="en cours">En cours</option>
-              <option value="terminée">Terminées</option>
-              <option value="" selected>Toutes</option>
-            </select>
-          </div>
-        </div>
       </div>
     </div>
     <div id="global-overlay">

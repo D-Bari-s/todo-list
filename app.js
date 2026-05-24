@@ -10,7 +10,9 @@ const disconnect_btn = document.querySelector('#disconnect-btn');
 
 const priority_select = document.querySelector('#priority-select');
 const state_select = document.querySelector('#state-select');
-const per_page = document.querySelector('#per_page');
+const per_page = document.querySelector('#per-page');
+const page_form = document.querySelector('#page-form');
+console.log(page_form);
 // On récupère le titre de la page pour décider de quelle fonction s'exécute :
 const titre_page = document.title;
 
@@ -20,7 +22,8 @@ const notes_moyennes = null;
 const notes_hautes = null;
 
 //Page :
-const page = 0;
+var page = 1;
+var max_page = 0;
 // ---------------------- Définition des fonctions : -------------------------------------------------
 
 
@@ -29,13 +32,18 @@ async function afficherNotes(order = null, direction = null)
 {
     try
     {
+        //On récupère toutes les notes de l'utilisateur pour calculer max page :
+        const notes_all = await fetch('api.php');
+        const all_json = await notes_all.json();
+        max_page = Math.ceil(all_json.response.length / per_page.value);
+
         //On vide le contenu HTML avant d'insérer :
         liste_notes.innerHTML = '';
         //On récupère les paramètres au besoin, permet d'avoir une seule fonction si les filtres sont appelés :
         let params = [];
         const state = state_select.value;
         const priority = priority_select.value;
-        const per_page = per_page.value;
+        const per_page_value = per_page.value;
 
         if (state != '')
         {  
@@ -47,8 +55,8 @@ async function afficherNotes(order = null, direction = null)
             params.push(`priority=${priority}`);
         }
 
-        if (page != null) params.push(`page=${page}`);
-        if (per_page != null) params.push(`per_page=${per_page}`);
+        if (page != '') params.push(`page=${page}`);
+        if (per_page_value != '') params.push(`per_page=${per_page_value}`);
         if (order != null) params.push(`order=${order}`);
         if (direction != null) params.push(`direction=${direction}`);
 
@@ -71,6 +79,46 @@ async function afficherNotes(order = null, direction = null)
             liste_notes.innerHTML = '<p>Aucune note pour l\'instant, ajoutez votre première note...</p>';
             return;
         }
+        //Affichage des pages :
+        const button_down = document.querySelector('button[value="down"]');
+        const button_up = document.querySelector('button[value="up"]');
+        if(per_page_value == '')
+        {
+            document.querySelector('#page-form').style.opacity = '0';
+            button_down.disabled = true;
+            button_up.disabled = true;
+        }
+        if (per_page_value != '')
+        {
+            button_down.disabled = false;
+            button_up.disabled = false;
+            document.querySelector('#page-form').style.opacity = '1';
+            document.querySelector('#current-page').textContent = 'Page '+page+' / '+max_page;
+
+            if (page == 1)
+            {
+                button_down.disabled = true;
+                button_down.style.opacity = '0.5';
+            }
+                
+            else 
+            {
+                button_down.disabled = false;
+                button_down.style.opacity = '1';
+            }
+
+            if (page == max_page)
+            {
+                button_up.disabled = true;
+                button_up.style.opacity = '0.5';
+            }
+            else 
+            {
+                button_up.disabled = false;
+                button_up.style.opacity = '1';
+            }
+        }
+        
 
         //Sinon, créer les notes :
         let is_first = true;
@@ -118,15 +166,9 @@ function creerCarte(note)
 
         //Date de création du header :
         const note_created_at = document.createElement('span');
-        note_created_at.classList.add('note-created-at','mb-0');
+        note_created_at.classList.add('note-created-at','mb-0','text-muted','badge');
         note_created_at.textContent = `📅 Créée le ${formatDateTime(note.created_at)}`;
-        //Append le header :
-            // note_header.appendChild(note_header_title);
-            // note_header.appendChild(note_created_at);
 
-        //------------ Body de la carte : ------------
-            // const note_body = document.createElement('div');
-            // note_body.className = 'card-body';
         //Description de la note :
         const note_description = document.createElement('p');
         note_description.classList.add('note-description','mb-0');
@@ -208,7 +250,7 @@ function creerCarte(note)
 
 
         //On ajoute le header & le body à la carte :
-        const elements = [note_title, note_description, note_infos, note_actions];
+        const elements = [note_title, note_created_at, note_description, note_infos, note_actions];
         elements.forEach(element => note_card.appendChild(element));
         return note_card;
     }
@@ -537,16 +579,16 @@ if (titre_page == 'Liste des notes')
     //------------ eventListener sur les <select> de filtre ------------
 
     //On appelle afficherNotes en lui passant les paramètres choisis :
-    const priority_select = document.querySelector('#priority-select');
+    // const priority_select = document.querySelector('#priority-select');
     priority_select.addEventListener('change', () => afficherNotes());
 
     //On appelle afficherNotes en lui passant les paramètres choisis :
-    const state_select = document.querySelector('#state-select');
+    // const state_select = document.querySelector('#state-select');
     state_select.addEventListener('change', () => afficherNotes());
 
     //------------ eventListener sur le formulaire de tri ------------
     const ordre_form = document.querySelector('#ordre-form');
-    ordre_form.addEventListener('submit', async function(evenement){
+    ordre_form.addEventListener('submit', function(evenement){
         try
         {
             evenement.preventDefault();
@@ -565,6 +607,19 @@ if (titre_page == 'Liste des notes')
             afficherMessage(ex,'text-danger');
         }
     });
+
+    //Sélection du nombre de notes par page :
+    per_page.addEventListener('change', () => afficherNotes());
+
+    //Choix de la page :
+    page_form.addEventListener('submit', function(evenement)
+    {
+        evenement.preventDefault();
+        const action = evenement.submitter.value;
+        page = action == 'up' ? page+1 : page-1;
+        afficherNotes();
+    });
+
 }
 
 //----------------- Formater date & heure : -----------------
@@ -660,6 +715,7 @@ async function verifConnection()
 //Si le JS est appelé depuis index.html :
 if (titre_page == 'Liste des notes')
 {
+    
     verifConnection();
     afficherNotes();
     construirePopup();

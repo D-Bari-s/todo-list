@@ -69,12 +69,16 @@ textarea {
   width: 320px;
   height: calc(100vh - 70px);
   overflow-y: auto;
-
 }
 
 
 #overlay-filtres-formulaire > * {
   animation: glisser 0.5s ease-out;
+}
+
+#per-page-div
+{
+  padding: 10px;
 }
 
 /* Zone des notes à droite */
@@ -209,6 +213,10 @@ form>* {
   padding: 5px;
   transition: 0.2s ease;
 }
+/* Text wrap sur le p contenu dans note-card */
+.note-card p {
+  word-wrap: break-word;
+}
 
 .note-card:hover{
   /* grandir la div */
@@ -236,6 +244,14 @@ form>* {
 #filtre-body {
   display: flex;
   justify-content: space-around;
+  align-items: center;
+  gap: 16px;
+  box-shadow: none;
+}
+/* page-form doit être centré horizontalement & faire une largeur qui dépend du contenus */
+#page-form{
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 16px;
   box-shadow: none;
@@ -322,5 +338,8 @@ form>* {
     grid-template-columns: 1fr;
     padding: 0 12px 20px;
   }
-
+/* Responsive sur note-card */
+  .note-card {
+    max-width: 100%;
+  }
 }

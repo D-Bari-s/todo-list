@@ -336,8 +336,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
         }
         $state = $_GET['state'] ?? '';
         $priority = $_GET['priority'] ?? '';
-        $order = $_GET['order'];
-        $direcion = $_GET['direction'];
+        $order = $_GET['order'] ?? 'created_at';
+        $direction = $_GET['direction'] ?? 'ASC';
         //Par défaut page 1 avec 100 notes affichées :
         //On cast pour 2 raisons :
         // - Calcul pas possible si string & int
@@ -374,16 +374,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
         }
         //On n'ajoute qu'à la fin le LIMIT & OFFSET :
         
-        if($page != '' && $per_page != '')
+        if($page != 0 && $per_page != 0)
         {
-
             //Si page == 0 -> pas d'offset :
             $offset = ($page - 1) * $per_page;
             //On peut se permettre de faire de l'interpolation car les paramètres ont été cast explicitement en int :
             //Pas de risque d'injection
             $string_notes.=" LIMIT $per_page OFFSET $offset";
         }
-        
 
         //Préparation de la requête :
         $sth = $connection->prepare($string_notes);
